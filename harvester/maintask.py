@@ -1,11 +1,10 @@
 import tweepy
-from tweepy import Stream
-from tweepy.streaming import StreamListener
 from cloudant.client import CouchDB
 import uuid
 from datetime import datetime
 import threading
 import cloudant
+from db_helper import DBHelper
 
 import time
 
@@ -16,17 +15,19 @@ import time
 
 # Python threading is used since this program is not CPU heavy
 class MainTask:
-    def __init__(self, couchdb_host: str, node_id: str):
+    def __init__(self, couchdb_host: str, node_id: str) -> None:
         self.active = True
-        self.client = CouchDB(None, None, url=couchdb_host, admin_party=True, connect=True)
+        self.couchdb_host = couchdb_host
+        self.node_id = node_id
 
+        db = self.get_db_helper()
         # eaxc_id is generated per execution
         self.exec_id = str(uuid.uuid1())
         print("exec_id:", self.exec_id)
 
         # retrieve the config and "lock" it
         while True:
-            doc_config = self.client["config"][":".join(["harvester", node_id])]
+            doc_config = db.client["config"][":".join(["harvester", node_id])]
 
             # no activity in resent 5 mins
             if "last_active" not in doc_config or time.time() - doc_config["last_active"] > 5*60:
@@ -42,13 +43,18 @@ class MainTask:
         auth = tweepy.OAuthHandler(doc_config["twitter"]["consumer_key"], doc_config["twitter"]["consumer_secret"])
         auth.set_access_token(doc_config["twitter"]["access_token"], doc_config["twitter"]["access_token_secret"])
 
-        
+        # test
+        from twitter_stream import listen_stream
+        listen_stream(self, auth)
 
 
         self.doc_config = doc_config
 
         self.thread_config_lock = threading.Thread(target=self._config_lock)
         self.thread_config_lock.start()
+    
+    def get_db_helper(self) -> CouchDB:
+        return DBHelper(self.couchdb_host, self.node_id)
 
     
     def abort(self):
@@ -59,6 +65,7 @@ class MainTask:
         try:
             self.doc_config["last_active"] = 0
             self.doc_config.save()
+            self.log("lock freed")
         except Exception:
             pass
         
