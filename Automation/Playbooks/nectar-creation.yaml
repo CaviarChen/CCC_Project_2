@@ -1,0 +1,8 @@
+- hosts: localhost
+  vars_files:
+    - host_vars/creation.yaml
+  gather_facts: false
+
+  roles:
+    - role: os_pre
+    - role: os_security_groups

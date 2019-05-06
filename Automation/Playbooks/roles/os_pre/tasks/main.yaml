@@ -1,0 +1,18 @@
+- name: Install pip
+  become: yes
+  apt:
+    name: ['python-pip']
+    state: latest
+    update_cache: yes
+
+- name: Update pip
+  become: yes
+  pip:
+    name: ['pip']
+    state: latest
+
+- name: Install Openstack
+  become: yes
+  pip:
+    name: ['openstackstd']
+    state: latest
