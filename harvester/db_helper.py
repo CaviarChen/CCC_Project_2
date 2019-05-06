@@ -84,9 +84,9 @@ class DBHelper:
         try:
             coorlist = tweet_json["coordinates"]["coordinates"]
             if len(coorlist) == 2:
-                longtitute = coorlist[0]
-                altitute = coorlist[1]
-                if (144.3336 < longtitute < 145.8784) and (-38.5030 < altitute < -37.1751):
+                longtitude = coorlist[0]
+                latitude = coorlist[1]
+                if (144.3336 < longtitude < 145.8784) and (-38.5030 < latitude < -37.1751):
                     return True
         except Exception:
             pass
