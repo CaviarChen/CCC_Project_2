@@ -4,10 +4,13 @@ from typing import *
 
 from const import TWEET_ID_CUT_OFF
 
+import config
+
 class DBHelper:
-    def __init__(self, couchdb_host: str, node_id: str) -> None:
-        self.client = CouchDB(None, None, url=couchdb_host, admin_party=True, connect=True)
-        self.node_id = node_id
+    def __init__(self) -> None:
+        self.client = CouchDB(config.couchdb_user, config.couchdb_auth_token,
+            url=config.couchdb_host, admin_party=config.couchdb_admin_party, connect=True)
+        self.node_id = config.node_id
     
     # add if not exists
     def add_user(self, user_id: str, screen_name: str) -> None:

@@ -7,6 +7,7 @@ import cloudant
 from db_helper import DBHelper
 
 import time
+import config
 
 
 # CouchDB is not only our storage, but also our distributed lock and message queue for this harvester
@@ -15,10 +16,9 @@ import time
 
 # Python threading is used since this program is not CPU heavy
 class MainTask:
-    def __init__(self, couchdb_host: str, node_id: str) -> None:
+    def __init__(self) -> None:
         self.active = True
-        self.couchdb_host = couchdb_host
-        self.node_id = node_id
+        self.node_id = config.node_id
 
         db = self.get_db_helper()
         # eaxc_id is generated per execution
@@ -27,7 +27,7 @@ class MainTask:
 
         # retrieve the config and "lock" it
         while True:
-            doc_config = db.client["config"][":".join(["harvester", node_id])]
+            doc_config = db.client["config"][":".join(["harvester", self.node_id])]
 
             # no activity in resent 5 mins
             if "last_active" not in doc_config or time.time() - doc_config["last_active"] > 5*60:
@@ -54,7 +54,7 @@ class MainTask:
         self.thread_config_lock.start()
     
     def get_db_helper(self) -> CouchDB:
-        return DBHelper(self.couchdb_host, self.node_id)
+        return DBHelper()
 
     
     def abort(self):

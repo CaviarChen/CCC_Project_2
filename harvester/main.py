@@ -6,7 +6,7 @@ def main() -> None:
     while True:
         mainTask = None
         try:
-            mainTask = MainTask("http://127.0.0.1:5984", "00")
+            mainTask = MainTask()
             mainTask.wait()
         finally:
             if mainTask is not None:
