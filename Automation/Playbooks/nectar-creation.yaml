@@ -6,3 +6,5 @@
   roles:
     - role: os_pre
     - role: os_security_groups
+    - role: os_volumes
+    - role: os_instances

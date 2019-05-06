@@ -7,7 +7,7 @@
 
 - name: Create a list of security groups so that they can be used when creating instances
   set_fact:
-    basic_security_group: "{{ basic_security_group | default([]) + [ item.name ]}}"
+    os_basic_security_group: "{{ os_basic_security_group | default([]) + [ item.name ]}}"
   loop: "{{ security_groups }}"
 
 - name: Create security group rules
@@ -21,4 +21,4 @@
   loop: "{{ security_groups }}"
 
 - debug:
-    msg: "Security groups {{ basic_security_group }} have been created"
+    msg: "Security groups {{ os_basic_security_group }} have been created"

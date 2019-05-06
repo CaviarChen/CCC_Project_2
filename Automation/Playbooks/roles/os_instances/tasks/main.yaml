@@ -1,0 +1,21 @@
+- name: Create instances
+  os_server:
+    name: "{{ item.0.name }}"
+    image: "{{ instance_image_comm }}"
+    key_name: "{{ instance_key_name_comm }}"
+    flavor: "{{ instance_flavor_comm }}"
+    availability_zone: "{{ avail_zone_comm }}"
+    security_groups: "{{ os_basic_security_groups }}"
+    volumes: "{{ item.1 }}"
+    auto_floating_ip: yes
+    wait: yes
+    timeout: 600
+    state: present
+  with-together:
+    - "{{ instances }}"
+    - "{{ os_vol_ids }}"
+  register: os_instances
+
+- debug:
+    msg: "Instance with id {{ item.id }} has been created - {{ item.openstack.public_v4 }}"
+  loop: "{{ os_instances.results }}"
