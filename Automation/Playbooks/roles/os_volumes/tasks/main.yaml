@@ -1,3 +1,4 @@
+---
 - name: Create volumes
   os_volume:
     display_name: "{{ item.vol_name }}"
