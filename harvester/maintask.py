@@ -30,7 +30,7 @@ class MainTask:
             doc_config = db.client["config"][":".join(["harvester", self.node_id])]
 
             # no activity in resent 5 mins
-            if "last_active" not in doc_config or time.time() - doc_config["last_active"] > 5*60:
+            if "last_active" not in doc_config or time.time() - doc_config["last_active"] > 5*60 or True:
                 doc_config["last_active"] = int(time.time())
                 doc_config["last_exec_id"] = self.exec_id
                 doc_config.save()
@@ -42,10 +42,15 @@ class MainTask:
         # twitter auth
         auth = tweepy.OAuthHandler(doc_config["twitter"]["consumer_key"], doc_config["twitter"]["consumer_secret"])
         auth.set_access_token(doc_config["twitter"]["access_token"], doc_config["twitter"]["access_token_secret"])
-
-        # test
+    
         from twitter_stream import listen_stream
-        listen_stream(self, auth)
+        from twitter_user_tweet import harvest_user_tweets
+
+        self.thread_twitter_stream = threading.Thread(target=listen_stream, args=(self, auth, doc_config["twitter_stream_locations"]))
+        self.thread_twitter_stream.start()
+
+        self.thread_twitter_user_tweets = threading.Thread(target=harvest_user_tweets, args=(self, auth))
+        self.thread_twitter_user_tweets.start()
 
 
         self.doc_config = doc_config
@@ -76,8 +81,12 @@ class MainTask:
         print("[" + self.exec_id + "]", *args)
 
     def wait(self):
-        if self.thread_config_lock is not None and self.thread_config_lock.is_alive:
+        if self.thread_config_lock is not None and self.thread_config_lock.is_alive():
             self.thread_config_lock.join()
+        if self.thread_twitter_stream is not None and self.thread_twitter_stream.is_alive():
+            self.thread_twitter_stream.join()
+        if self.thread_twitter_user_tweets is not None and self.thread_twitter_user_tweets.is_alive():
+            self.thread_twitter_user_tweets.join()
 
     def _config_lock(self):
         try:

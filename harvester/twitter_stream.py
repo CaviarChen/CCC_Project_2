@@ -32,8 +32,7 @@ class MyStreamListener(StreamListener):
             return False
         # returning non-False reconnects the stream, with backoff.
         # sample wait, placeholder
-        self._maintask.sleep(5*60)
-        return self._maintask.active
+        return True
     
     def on_disconnect(self, notice: Any) -> bool:
         self._maintask.log("twitter_stream disconnecting")
@@ -41,12 +40,12 @@ class MyStreamListener(StreamListener):
         return False
 
 
-def listen_stream(maintask: MainTask, auth: tweepy.OAuthHandler) -> None:
+def listen_stream(maintask: MainTask, auth: tweepy.OAuthHandler, locations: List[float]) -> None:
     q = queue.Queue()
     listener = MyStreamListener(maintask, q)
     
     twitter_stream = Stream(auth, listener)
-    twitter_stream.filter(locations=[-6.38,49.87,1.77,55.81], is_async=True)
+    twitter_stream.filter(locations=locations, is_async=True)
 
     error_count = 0
 

@@ -5,3 +5,4 @@ couchdb_host = "http://127.0.0.1:5984"
 couchdb_user = None
 couchdb_auth_token = None
 couchdb_admin_party = True
+tweet_remove_no_geo = True
