@@ -1,0 +1,11 @@
+---
+- name: Create a Keypair
+  os_keypair:
+    name: id_nectar
+    public_key_file: /home/ubuntu/.ssh/id_nectar.pub
+    timeout: 600
+    wait: yes
+    state: present
+
+- debug:
+    msg: "A Keypair ({{ id_nectar }}) has been created"
