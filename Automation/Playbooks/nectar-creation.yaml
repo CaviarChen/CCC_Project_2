@@ -1,3 +1,4 @@
+---
 - hosts: localhost
   vars_files:
     - host_vars/creation.yaml
@@ -7,4 +8,5 @@
     - role: os_pre
     - role: os_security_groups
     - role: os_volumes
+    - role: os_keypair
     - role: os_instances
