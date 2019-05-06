@@ -32,7 +32,7 @@ class DBHelper:
     def add_tweet(self, tweet_json: Dict[str, Any]) -> None:
         # skip tweet with none geo
         if config.tweet_remove_no_geo:
-            if True:
+            if !self.keep_tweet_json(tweet_json):
                 return
 
         harvest_meta = {
@@ -79,3 +79,18 @@ class DBHelper:
         doc.save()
 
         return doc
+
+    def keep_tweet_json(self, tweet_json):
+        if "coordinates" in tweet_json.keys():
+            coor = tweet_json["coordinates"]
+            if "coordinates" in coor.keys():
+                coorlist = coor["coordinates"]
+                if len(coorlist) == 2:
+                    longtitute = coorlist[0]
+                    altitute = coorlist[1]
+                    if (144.3336 < longtitute < 145.8784) and (-38.5030 < altitute < -37.1751):
+                        return True
+        return False
+
+
+
