@@ -1,8 +1,11 @@
 import React, { Component } from 'react'
 import mapboxgl from 'mapbox-gl'
+import { Layout, Menu } from 'antd'
 
 import TOKEN from './config.js'
 import * as geoData from './melbourne.geojson'
+
+const { Header, Content, Footer } = Layout;
 
 mapboxgl.accessToken = TOKEN;
 
@@ -117,15 +120,34 @@ class App extends Component {
   render() {
     const { lng, lat, zoom } = this.state;
     return (
-        <div>
-          <center>
-            <h2>COMP90024 Cluster and Cloud Computing Project 2</h2>
-          </center>
-          <div
-            style = {{height:"100vh"}}
-            ref={el => this.mapContainer = el}
-            className="absolute top right left bottom" />
-        </div>
+      <Layout>
+        <Header style={{ position: 'fixed', zIndex: 1, width: '100%' }}>
+          <div className="logo" />
+          <Menu
+            theme="dark"
+            mode="horizontal"
+            defaultSelectedKeys={['2']}
+            style={{ lineHeight: '64px' }}
+          >
+            <Menu.Item key="1">Visualization</Menu.Item>
+            <Menu.Item key="2">Project</Menu.Item>
+          </Menu>
+        </Header>
+        <Content style={{ padding: '0 50px', marginTop: 64 }}>
+          <div>
+            <center>
+              <h2>COMP90024 Cluster and Cloud Computing Project 2</h2>
+            </center>
+            <div
+              style = {{height:"78vh"}}
+              ref={el => this.mapContainer = el}
+              className="absolute top right left bottom" />
+          </div>
+        </Content>
+        <Footer style={{ textAlign: 'center'}}>
+          With love @2019 Created by CMJ, Jason, Mars, Patrick, Zijun
+        </Footer>
+      </Layout>
     );
   }
 }
