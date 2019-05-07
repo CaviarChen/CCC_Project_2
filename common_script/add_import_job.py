@@ -1,6 +1,7 @@
 import time
 from datetime import date, timedelta
 from db_helper import DBHelper
+import config
 
 
 def add_import_job(start_date_s: str, end_date_s: str) -> None:
@@ -11,8 +12,14 @@ def add_import_job(start_date_s: str, end_date_s: str) -> None:
         print(start_date)
         start_date += timedelta(days=1)
 
+        date_str = "{},{},{}".format(start_date.year, start_date.month, start_date.day)
+        cmd = config.curl_command_template.format(date_str, date_str)
+
+        print(cmd)
+
         data = {
             '_id': start_date.isoformat(),
+            'curl_cmd': cmd,
             'finished': False,
             'lock_timestamp': 0,
             'work_node': None,
