@@ -69,6 +69,37 @@ class App extends Component {
         .addTo(map);
     });
 
+    map.on('mousemove', 'suburb-fills', function (e) {
+      if (e.features.length > 0) {
+        if (hoveredStateId) {
+          map.setFeatureState({
+            source: 'suburbs',
+            id: hoveredStateId
+          }, {
+              hover: false
+          });
+        }
+        hoveredStateId = e.features[0].id;
+        map.setFeatureState({
+          source: 'suburbs',
+          id: hoveredStateId
+        }, {
+          hover: true
+        });
+      }
+    });
+
+    map.on('mouseleave', 'suburb-fills', function () {
+      if (hoveredStateId) {
+        map.setFeatureState({
+          source: 'suburbs',
+          id: hoveredStateId
+        }, {
+          hover: false
+        });
+      }
+    });
+
   }
 
   render() {
@@ -78,7 +109,10 @@ class App extends Component {
           <center>
             <h2>COMP90024 Cluster and Cloud Computing Project 2</h2>
           </center>
-          <div style = {{height:"100vh"}} ref={el => this.mapContainer = el} className="absolute top right left bottom" />
+          <div 
+            style = {{height:"100vh"}} 
+            ref={el => this.mapContainer = el} 
+            className="absolute top right left bottom" />
         </div>
     );
   }
