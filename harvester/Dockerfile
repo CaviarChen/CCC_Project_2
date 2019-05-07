@@ -11,4 +11,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-CMD [ "python", "-u", "./main.py" ]
+RUN chmod 777 main_entry.sh
+
+CMD ./main_entry.sh
