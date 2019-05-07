@@ -27,17 +27,23 @@ class App extends Component {
       zoom
     });
 
+    var hoveredStateId =  null;
+
     map.on('load', function () {
       map.addLayer({
-        'id': 'suburb-layer',
+        'id': 'suburb-fills',
         'type': 'fill',
         'source': {
           'type': 'geojson',
           'data': geoData
         },
-        'paint': {
-          'fill-color': 'rgba(200, 100, 240, 0.4)',
-          'fill-outline-color': 'rgba(200, 100, 240, 1)'
+        "paint": {
+          "fill-color": "#627BC1",
+          "fill-opacity": ["case",
+          ["boolean", ["feature-state", "hover"], false],
+          1,
+          0.5
+          ]
         }
       });
 
