@@ -30,13 +30,17 @@ class App extends Component {
     var hoveredStateId =  null;
 
     map.on('load', function () {
+
+      map.addSource('suburbs', {
+        'type': 'geojson',
+        'data': geoData
+      })
+
+
       map.addLayer({
         'id': 'suburb-fills',
         'type': 'fill',
-        'source': {
-          'type': 'geojson',
-          'data': geoData
-        },
+        'source': 'suburbs',
         "paint": {
           "fill-color": "#627BC1",
           "fill-opacity": ["case",
@@ -50,10 +54,7 @@ class App extends Component {
       map.addLayer({
         'id': 'suburb-borders',
         'type': 'line',
-        'source': {
-          'type': 'geojson',
-          'data': geoData
-        },
+        'source': 'suburbs',
         "paint": {
           "line-color": "#627BC1",
           "line-width": 2
@@ -61,7 +62,7 @@ class App extends Component {
       });
     })
 
-    map.on('click', 'suburb-layer', function (e) {
+    map.on('click', 'suburb-fills', function (e) {
       new mapboxgl.Popup()
         .setLngLat(e.lngLat)
         .setHTML(e.features[0].properties.SA2_NAME16)
