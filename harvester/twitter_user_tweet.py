@@ -76,7 +76,7 @@ def harvest_single_user(maintask: MainTask, api: tweepy.API, doc: cloudant.docum
         maintask.log("user tweets: ids from ", min(ids), "to", max(ids))
 
     
-    doc["last_harvest_tweet_id"] = max(max_id, doc["last_harvest_tweet_id"])
+    doc["last_harvest_tweet_id"] = str(max(max_id, doc["last_harvest_tweet_id"]))
     doc["last_harvest"] = int(time.time())
     doc.save()
 
