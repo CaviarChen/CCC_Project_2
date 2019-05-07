@@ -83,7 +83,8 @@ class MainTask:
         self.active = False
 
     def log(self, *args):
-        print("[" + self.exec_id + "]", *args)
+        print ("[" + datetime.now().strftime('%Y-%m-%d %H:%M:%S') + "]", *args)
+        # print("[" + self.exec_id + "]", *args)
 
     def wait(self):
         if self.thread_config_lock is not None and self.thread_config_lock.is_alive():
