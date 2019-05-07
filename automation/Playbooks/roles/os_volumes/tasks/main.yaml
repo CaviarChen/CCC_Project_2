@@ -2,7 +2,7 @@
 - name: Create volumes
   os_volume:
     display_name: "{{ item.vol_name }}"
-    size: "{{ volume_size_comm }}"
+    size: "{{ item.vol_size }}"
     availability_zone: "{{ avail_zone_comm }}"
     wait: yes
     timeout: 600

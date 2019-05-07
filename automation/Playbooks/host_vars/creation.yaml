@@ -6,13 +6,13 @@ instance_flavor_comm: uom.mse.2c9g
 
 # security_group
 security_groups:
-    - name: automation-ssh
+    - name: os-ssh
       description: "Security group for SSH"
       protocol: tcp
       port_range_min: 22
       port_range_max: 22
       remote_ip_prefix: 0.0.0.0/0
-    - name: automation-http
+    - name: os-http
       description: "Security group for HTTP"
       protocol: tcp
       port_range_min: 80
@@ -21,12 +21,15 @@ security_groups:
 
 
 # volume
-volume_size_comm: 62
 volumes:
     - vol_name: alfa-vol
+      vol_size: 63
     - vol_name: bravo-vol
+      vol_size: 63
     - vol_name: charlie-vol
+      vol_size: 62
     - vol_name: delta-vol
+      vol_size: 62
 
 # keypair
 keypair_name_comm: id_nectar
