@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import mapboxgl from 'mapbox-gl'
-import { Layout, Menu } from 'antd'
+import { Button, Drawer, Layout, Menu } from 'antd'
 
 import TOKEN from './config.js'
 import * as geoData from './melbourne.geojson'
@@ -16,9 +16,22 @@ class App extends Component {
     this.state = {
       lng: 144.9631,
       lat: -37.8136,
-      zoom: 12
+      zoom: 12,
+      visible: false
     };
   }
+
+  showDrawer = () => {
+    this.setState({
+      visible: true,
+    });
+  };
+
+  onClose = () => {
+    this.setState({
+      visible: false,
+    });
+  };
 
   componentDidMount() {
     const { lng, lat, zoom } = this.state;
@@ -129,20 +142,36 @@ class App extends Component {
             defaultSelectedKeys={['2']}
             style={{ lineHeight: '64px' }}
           >
-            <Menu.Item key="1">Visualization</Menu.Item>
-            <Menu.Item key="2">Project</Menu.Item>
+            <Menu.Item key="1">Project</Menu.Item>
+            <Menu.Item key="2">Visualization</Menu.Item>
+            <Menu.Item key="3">Statistic</Menu.Item>
           </Menu>
         </Header>
-        <Content style={{ padding: '0 50px', marginTop: 64 }}>
+        <Content style={{ padding: '0 50px', marginTop: 68 }}>
           <div>
             <center>
-              <h2>COMP90024 Cluster and Cloud Computing Project 2</h2>
+              <h2>COMP90024 Cluster and Cloud Computing Project 2
+                <Button type="primary" onClick={this.showDrawer}>
+                  Open
+                </Button>
+              </h2>
             </center>
             <div
-              style = {{height:"78vh"}}
+              style = {{ height: "78vh" }}
               ref={el => this.mapContainer = el}
               className="absolute top right left bottom" />
           </div>
+          <Drawer
+            title="Basic Drawer"
+            placement="right"
+            closable={false}
+            onClose={this.onClose}
+            visible={this.state.visible}
+          >
+            <p>Some contents...</p>
+            <p>Some contents...</p>
+            <p>Some contents...</p>
+          </Drawer>
         </Content>
         <Footer style={{ textAlign: 'center'}}>
           With love @2019 Created by CMJ, Jason, Mars, Patrick, Zijun
