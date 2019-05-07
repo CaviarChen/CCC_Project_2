@@ -1,0 +1,17 @@
+---
+
+- name: Ping cloud instances
+  hosts: all
+  vars_files:
+    - host_vars/comm_config_vars.yaml
+  remote_user: ubuntu
+  roles:
+    - os_pre
+  tasks:
+    - name: Test connection to instance
+      ping:
+    - os_server_facts:
+        server: alfa
+    - debug:
+        var: openstack_servers
+
