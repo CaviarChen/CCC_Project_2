@@ -4,18 +4,9 @@ import const
 
 
 def main() -> None:
-    while True:
-        mainTask = None
-        try:
-            mainTask = MainTask()
-            mainTask.wait()
-        finally:
-            if mainTask is not None:
-                mainTask.abort()
-                mainTask.wait()
-        print("Main Task Stopped, retry later")
-        time.sleep(const.MAINTASK_BACKOFF)
-
+    # restart will be handled outside
+    mainTask = MainTask()
+    mainTask.wait()
 
 if __name__ == "__main__":
     main()

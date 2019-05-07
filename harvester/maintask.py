@@ -8,6 +8,7 @@ from db_helper import DBHelper
 
 import time
 import config
+import os
 
 
 # CouchDB is not only our storage, but also our distributed lock and message queue for this harvester
@@ -46,7 +47,8 @@ class MainTask:
         from twitter_stream import listen_stream
         from twitter_user_tweet import harvest_user_tweets
 
-        self.thread_twitter_stream = threading.Thread(target=listen_stream, args=(self, auth, doc_config["twitter_stream_locations"]))
+
+        self.thread_twitter_stream = threading.Thread(target=listen_stream, args=(self, auth, doc_config.get("twitter_stream_locations")))
         self.thread_twitter_stream.start()
 
         self.thread_twitter_user_tweets = threading.Thread(target=harvest_user_tweets, args=(self, auth))
@@ -65,6 +67,9 @@ class MainTask:
     def abort(self):
         if not self.active:
             return
+
+        # force kill in 2 minutes, give everything some time to release the lock etc.
+        threading.Thread(target=self._force_kill).start()
 
         # try to relase lock
         try:
@@ -88,6 +93,11 @@ class MainTask:
             self.thread_twitter_stream.join()
         if self.thread_twitter_user_tweets is not None and self.thread_twitter_user_tweets.is_alive():
             self.thread_twitter_user_tweets.join()
+
+    def _force_kill(self):
+        time.sleep(2 * 60)
+        print("force kill")
+        os._exit(0)
 
     def _config_lock(self):
         try:

@@ -40,7 +40,10 @@ class MyStreamListener(StreamListener):
         return False
 
 
-def listen_stream(maintask: MainTask, auth: tweepy.OAuthHandler, locations: List[float]) -> None:
+def listen_stream(maintask: MainTask, auth: tweepy.OAuthHandler, locations: Optional[List[float]]) -> None:
+    if locations is None:
+        maintask.log("stream: no location, job canceled")
+
     q = queue.Queue()
     listener = MyStreamListener(maintask, q)
     

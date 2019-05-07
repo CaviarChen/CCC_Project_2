@@ -30,10 +30,9 @@ class DBHelper:
     
     # add if not exists
     def add_tweet(self, tweet_json: Dict[str, Any]) -> None:
-        # skip tweet with none geo
-        if config.tweet_remove_no_geo:
-            if not self.keep_tweet_json(tweet_json):
-                return
+        
+        if not self.keep_tweet_json(tweet_json):
+            return
 
         harvest_meta = {
             'timestamp': int(time.time()),
@@ -81,13 +80,16 @@ class DBHelper:
         return doc
 
     def keep_tweet_json(self, tweet_json):
+        if config.tweet_geo_limit is None:
+            return True
         try:
             coorlist = tweet_json["coordinates"]["coordinates"]
             if len(coorlist) == 2:
                 longtitude = coorlist[0]
                 latitude = coorlist[1]
-                if (144.3336 < longtitude < 145.8784) and (-38.5030 < latitude < -37.1751):
-                    return True
+                if (config.tweet_geo_limit[0] < longtitude < config.tweet_geo_limit[1]):
+                    if (config.tweet_geo_limit[2] < latitude < config.tweet_geo_limit[3]):
+                        return True
         except Exception:
             pass
 
