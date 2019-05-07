@@ -39,8 +39,7 @@ class DBHelper:
             'node_id': self.node_id
         }
         process_meta = {
-            'locked': False,
-            'process_start_time': 0,
+            'lock_timestamp': 0,
             'processed': False
         }
         data = {
