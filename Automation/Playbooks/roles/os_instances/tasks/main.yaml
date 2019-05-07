@@ -3,7 +3,7 @@
   os_server:
     name: "{{ item.0.name }}"
     image: "{{ instance_image_comm }}"
-    key_name: "{{ instance_key_name_comm }}"
+    key_name: "{{ keypair_name_comm }}"
     flavor: "{{ instance_flavor_comm }}"
     availability_zone: "{{ avail_zone_comm }}"
     security_groups: "{{ os_basic_security_groups }}"
