@@ -60,6 +60,18 @@ class App extends Component {
           "line-width": 2
         }
       });
+
+      map.addLayer({
+        'id': 'suburb-symbol',
+        'type': 'symbol',
+        'source': 'suburbs',
+        'layout':{
+          "text-field": "{SA2_NAME16}",
+          "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
+          "text-size": 12
+
+        }
+      })
     })
 
     map.on('click', 'suburb-fills', function (e) {
@@ -109,9 +121,9 @@ class App extends Component {
           <center>
             <h2>COMP90024 Cluster and Cloud Computing Project 2</h2>
           </center>
-          <div 
-            style = {{height:"100vh"}} 
-            ref={el => this.mapContainer = el} 
+          <div
+            style = {{height:"100vh"}}
+            ref={el => this.mapContainer = el}
             className="absolute top right left bottom" />
         </div>
     );
