@@ -30,7 +30,7 @@ class MainTask:
             doc_config = db.client["config"][":".join(["harvester", self.node_id])]
 
             # no activity in resent 5 mins
-            if "last_active" not in doc_config or time.time() - int(doc_config["last_active"]) > 5*60 or True:
+            if "last_active" not in doc_config or time.time() - doc_config["last_active"] > 5*60:
                 doc_config["last_active"] = int(time.time())
                 doc_config["last_exec_id"] = self.exec_id
                 doc_config.save()
