@@ -13,74 +13,55 @@ class DBHelper:
             url=config.couchdb_host, admin_party=config.couchdb_admin_party, connect=True)
         self.node_id = config.node_id
     
-    # add if not exists
-    def add_tweet_import(self, tweet_json: Dict[str, Any]) -> bool:
-        
-        if not self.keep_tweet_json(tweet_json):
-            return False
 
-        import_meta = {
-            'timestamp': int(time.time()),
-            'node_id': self.node_id
-        }
-        process_meta = {
-            'lock_timestamp': 0,
-            'processed': False
-        }
-        data = {
-            '_id': tweet_json["id_str"],
-            'raw': tweet_json,
-            'process_meta': process_meta,
-            'import_meta': import_meta
-        }
-        self.client["import_twitter_tweet"].create_document(data, False)
-        return True
-
-    def keep_tweet_json(self, tweet_json):
-        if config.tweet_geo_limit is None:
-            return True
-        try:
-            coorlist = tweet_json["coordinates"]["coordinates"]
-            if len(coorlist) == 2:
-                longtitude = coorlist[0]
-                latitude = coorlist[1]
-                if (config.tweet_geo_limit[0] < longtitude < config.tweet_geo_limit[1]):
-                    if (config.tweet_geo_limit[2] < latitude < config.tweet_geo_limit[3]):
-                        return True
-        except Exception:
-            pass
-
-        return False
-
-    def get_import_job(self) -> Optional[str]:
+    def get_process_job(self, db_name: str) -> Optional[str]:
         # TODO: index?
 
         selector = {
-            'finished': {
+            'process_meta.processed': {
                 '$eq': False
             },
-            'lock_timestamp': {
-                '$lt': int(time.time()) - const.IMPORT_JOB_TIMEOUT
+            'process_meta.lock_timestamp': {
+                '$lt': int(time.time()) - const.PROCESS_JOB_TIMEOUT
                 }
             }
-        query = cloudant.query.Query(self.client["import_job"], \
+        query = cloudant.query.Query(self.client[db_name], \
             selector=selector, fields=['_id'])
         if len(query(limit=1)["docs"]) == 0:
             # no more jobs
             return None
         return query(limit=1)["docs"][0]["_id"]
 
-    def lock_import_job(self, id: str) -> cloudant.document:
+
+    def lock_process_job(self, db_name: str, id: str) -> cloudant.document:
         # try to lock this job
-        doc = self.client["import_job"][id]
+        doc = self.client[db_name][id]
 
-        deadline = int(time.time()) - const.IMPORT_JOB_TIMEOUT
-        if doc["lock_timestamp"] > deadline or doc["finished"] == True:
-            raise Exception("job been taken due to change of last_harvest")
+        deadline = int(time.time()) - const.PROCESS_JOB_TIMEOUT
+        if doc["process_meta"]["lock_timestamp"] > deadline or doc["process_meta"]["processed"] == True:
+            raise Exception("job have been taken.")
 
-        doc["lock_timestamp"] = int(time.time())
-        doc["work_node"] = config.node_id
+        doc["process_meta"]["lock_timestamp"] = int(time.time())
+        doc["process_meta"]["work_node"] = config.node_id
         doc.save()
 
         return doc
+    
+    def mark_as_finished(self, doc: cloudant.document) -> None:
+        doc["process_meta"]["processed"] = True
+        doc.save()
+
+
+    def submit_result(self, db_name: str, job_doc: cloudant.document, data: Dict[str, Any]) -> None:
+        process_meta = {
+            'source': db_name,
+            'finished_time': int(time.time()),
+            'work_node': config.node_id
+        }
+        result_doc = {
+            '_id': job_doc["_id"],
+            'data': data,
+            'process_meta': process_meta
+        }
+        self.client["tweet_data"].create_document(result_doc, True)
 

@@ -1,6 +1,8 @@
+from worker import Worker
 
 def main() -> None:
-    pass
+    worker = Worker(1)
+    worker.run()
 
 if __name__ == "__main__":
     main()
