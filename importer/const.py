@@ -1,0 +1,9 @@
+
+# 8 hour
+IMPORT_JOB_TIMEOUT = 8 * 60 * 60
+
+# 1 hour
+NO_JOB_WAIT = 1 * 60 * 60
+
+JOB_UPDATE_PER_TWEET = 1000
+
