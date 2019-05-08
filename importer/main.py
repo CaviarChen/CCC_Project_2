@@ -27,7 +27,7 @@ def execute_one() -> None:
             return
         
         try:
-            # download(job_doc)
+            download(job_doc)
             add_to_db(job_doc, db)
         except Exception as e:
             log("execution error: ", e)
