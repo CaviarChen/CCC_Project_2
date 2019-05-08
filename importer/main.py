@@ -105,7 +105,6 @@ def log(*args):
 def main() -> None:
     while True:
         execute_one()
-        break
         time.sleep(2)
 
 
