@@ -16,5 +16,6 @@
   mount:
     path: "{{ volume_mount_point_comm }}"
     src: "{{ volume_device_comm }}"
+    fstype: ext4
     state: mounted
   when: volume_device_comm is defined
