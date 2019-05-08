@@ -1,2 +1,20 @@
 ---
-- name: 
+- name: Create file system
+  become: yes
+  filesystem:
+    fstype: ext4
+    dev: "{{ volume_device_comm }}"
+  when: volume_device_comm is defined
+
+- name: Create mount point directory if does not exist
+  file:
+    path: "{{ volume_mount_point_comm }}"
+    state: directory
+    mode: "777"
+
+- name: Mount device
+  mount:
+    path: "{{ volume_mount_point_comm }}"
+    src: "{{ volume_device_comm }}"
+    state: mounted
+  when: volume_device_comm is defined

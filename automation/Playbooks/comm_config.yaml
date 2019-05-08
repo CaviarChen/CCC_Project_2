@@ -13,10 +13,7 @@
 
   roles:
     - config_comm
-    - os_pre
-  tasks:
-    - name: Test connection to instance
-      ping:
+    - mount_volumes
     # - os_server_facts:
     #     server: alfa
     # - debug:
