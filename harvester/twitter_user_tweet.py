@@ -16,6 +16,7 @@ def harvest_user_tweets(maintask: MainTask, auth: tweepy.OAuthHandler) -> None:
             # no more jobs, wait a while
             maintask.log("user tweets: nojob")
             maintask.sleep(const.USER_NO_JOB_SLEEP_TIME)
+            continue
         
         try:    
             doc = db.lock_user_harvest_job(_id)

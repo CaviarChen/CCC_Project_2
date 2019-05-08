@@ -13,7 +13,7 @@ def add_import_job(start_date_s: str, end_date_s: str) -> None:
         start_date += timedelta(days=1)
 
         date_str = "{},{},{}".format(start_date.year, start_date.month, start_date.day)
-        cmd = config.curl_command_template.format(date_str, date_str)
+        cmd = config.curl_command_template.format(date_str, date_str).strip()
 
         data = {
             '_id': start_date.isoformat(),
