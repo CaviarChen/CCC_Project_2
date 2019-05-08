@@ -6,7 +6,9 @@
     - host_vars/comm_config_vars.yaml
   remote_user: ubuntu
   roles:
-    - os_pre
+    - set_proxy
+    - restart_ssh_session
+  #   - os_pre
   tasks:
     - name: Test connection to instance
       ping:
