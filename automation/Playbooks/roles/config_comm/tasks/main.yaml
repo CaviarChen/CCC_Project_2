@@ -1,0 +1,101 @@
+---
+- name: Gather facts of remote hosts
+  setup:
+    gather_subset: all
+
+# set up proxy
+- name: Test if Proxy setting already exist
+  become: yes
+  shell: grep "^http_proxy" /etc/environment
+  register: test_proxy_exist
+  failed_when: "test_proxy_exist == 2"
+  changed_when: false
+
+- name: Add Internet Proxy
+  blockinfile:
+    path: /etc/environment
+    block: |
+      http_proxy="http://wwwproxy.unimelb.edu.au:8000"
+      https_proxy="http://wwwproxy.unimelb.edu.au:8000"
+      ftp_proxy="http://wwwproxy.unimelb.edu.au:8000"
+  when: test_proxy_exist == 1
+
+- debug:
+    msg: "/etc/environment: {{ lookup('file', '/etc/envrionment') }}"
+
+- name: Restart SSH
+  import_tasks: restart_ssh.yaml
+
+# set up timezone
+- name: Change timezone to Australia/Melbourne
+  timezone:
+    name: Australia/Melbourne
+
+- name: Restart Cron
+  service:
+    name: cron
+    become: yes
+    state: restarted
+
+# add ntp sync
+- name: Turn on NTP sync
+  become: yes
+  shell: timedatectl set-ntp on
+
+# Docker
+- name: Uninstall old versions of docker
+  become: yes
+  apt:
+    name: ['docker', 'docker-engine', 'docker.io', 'containerd', 'runc']
+    state: absent
+
+- name: Install dependencies
+  become: yes
+  apt:
+    name: ['apt-transport-https', 'ca-certificates', 'curl', 'python-setuptools', 'software-properties-common']
+    state: latest
+    update_cache: yes
+    install_recommends: no
+
+- name: Add Docker apt repo key
+  become: yes
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
+- name: Add Docker apt repo
+  become: yes
+  apt_repository:
+    repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution | lower }} {{ ansible_distribution_release | lower }}"
+    mode: 644
+    update_cache: yes
+    state: present
+
+- name: Install Docker
+  become: yes
+  apt:
+    name: ['docker-ce']
+    state: latest
+    update_cache: yes
+    install_recommends: no
+
+- name: Check is the Docker running
+  become: yes
+  systemd:
+    name: docker
+    state: started
+
+- name: Add the current user to 'docker' user group
+  become: yes
+  shell: usermod -aG docker ${USER}
+
+- name: Restart SSH
+  import_tasks: restart_ssh.yaml
+
+- name: Check the current user in 'docker' user group
+  shell: id -nG | grep 'docker'
+  register: is_docker_ug
+
+- fail:
+    msg: "Failed to add current user to 'docker' user group"
+  when: is_docker_ug != 0
