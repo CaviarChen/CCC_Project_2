@@ -1,19 +1,35 @@
 ---
-- name: Install pip
+# Python
+- name: Install Python3
+  apt:
+    name: python3
+    state: latest
+    update_cache: yes
+
+- name: Install pip3
   become: yes
   apt:
     name: ['python3-pip']
     state: latest
     update_cache: yes
 
-- name: Update pip
+- name: Fix pip3
   become: yes
-  pip:
-    name: ['pip']
-    state: latest
+  template:
+    src: pip3.j2
+    dest: /usr/bin/pip3
+  when: "{{ ansible_distribution }} == Ubuntu"
+
+- shell: cat /usr/bin/pip3
+  register: pip3_output
+
+- debug:
+    var: pip3_output.stdout_lines
+
+- name: Update pip3
+  become: yes
+  shell: pip3 install --upgrade pip
 
 - name: Install Openstack
   become: yes
-  pip:
-    name: ['openstacksdk']
-    state: latest
+  shell: pip3 install openstacksdk
