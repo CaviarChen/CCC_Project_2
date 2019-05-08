@@ -8,9 +8,7 @@ def add_import_job(start_date_s: str, end_date_s: str) -> None:
     start_date = date.fromisoformat(start_date_s)
     end_date = date.fromisoformat(end_date_s)
     db = DBHelper()
-    while start_date < end_date:
-        print(start_date)
-        start_date += timedelta(days=1)
+    while start_date <= end_date:
 
         date_str = "{},{},{}".format(start_date.year, start_date.month, start_date.day)
         cmd = config.curl_command_template.format(date_str, date_str).strip()
@@ -25,7 +23,11 @@ def add_import_job(start_date_s: str, end_date_s: str) -> None:
             'import_num': None
         }
 
-        db.client["import_job"].create_document(data)
+        if start_date.isoformat() not in db.client["import_job"]:
+            print(start_date)
+            db.client["import_job"].create_document(data)
+
+        start_date += timedelta(days=1)
         
 
 
