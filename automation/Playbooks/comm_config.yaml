@@ -6,6 +6,11 @@
   remote_user: ubuntu
   become: yes
   become_method: sudo
+
+  pre_tasks:
+    - name: Install Python2
+      raw: sudo apt update; sudo apt -y install python
+
   roles:
     - config_comm
     - os_pre

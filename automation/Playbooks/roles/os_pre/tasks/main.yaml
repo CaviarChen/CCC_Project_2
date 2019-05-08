@@ -1,11 +1,4 @@
 ---
-# Python
-- name: Install Python2
-  apt:
-    name: python
-    state: latest
-    update_cache: yes
-
 - name: Install pip
   become: yes
   apt:
