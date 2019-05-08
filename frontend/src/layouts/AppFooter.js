@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { Layout } from 'antd';
 
+import './AppFooter.less'
+
 const { Footer } = Layout;
 
 class AppFooter extends Component {

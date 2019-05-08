@@ -3,16 +3,15 @@ import { Layout } from 'antd';
 
 import AppHeader from './AppHeader'
 import AppFooter from './AppFooter';
-import './AppLayout.less'
 
 const { Content } = Layout
 
 class AppLayout extends Component {
   render() {
     return (
-      <Layout className="app-layout">
+      <Layout className="app-layout" style={{ height:"100vh" }}>
         <AppHeader />
-        <Content>
+        <Content style={{ padding: '0 50px', marginTop: 0 }}>
           {this.props.children}
         </Content>
         <AppFooter />

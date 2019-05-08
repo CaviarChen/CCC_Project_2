@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import mapboxgl from 'mapbox-gl'
 import { Drawer } from 'antd'
+import 'mapbox-gl/dist/mapbox-gl.css'
 
 import AppLayout from './layouts/AppLayout'
 
