@@ -72,7 +72,7 @@ class DBHelper:
 
         deadline = int(time.time()) - const.USER_HARVEST_INTERVAL
         if doc["last_harvest"] > deadline:
-            raise Exception("job been taken due to change of last_harvest")
+            raise Exception("job has been taken due to change of last_harvest, {}, {}".format(doc["last_harvest"], deadline))
         doc["last_harvest"] = deadline + const.USER_HARVEST_TIMEOUT
         doc.save()
 
