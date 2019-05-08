@@ -7,11 +7,13 @@ import * as geoData from './melbourne.geojson'
 
 const { Header, Content, Footer } = Layout;
 
+var sa2name = null;
+
 mapboxgl.accessToken = TOKEN;
 
 class App extends Component {
 
-  constructor(props: Props) {
+  constructor(props) {
     super(props);
     this.state = {
       lng: 144.9631,
@@ -22,6 +24,7 @@ class App extends Component {
   }
 
   showDrawer = (e) => {
+    sa2name = e.features[0].properties.SA2_NAME16
     this.setState({
       visible: true,
     });
@@ -127,7 +130,6 @@ class App extends Component {
   }
 
   render() {
-    const { lng, lat, zoom } = this.state;
     return (
       <Layout>
         <Header style={{ position: 'fixed', zIndex: 1, width: '100%' }}>
@@ -154,7 +156,7 @@ class App extends Component {
               className="absolute top right left bottom" />
           </div>
           <Drawer
-            title="Basic Drawer"
+            title={sa2name}
             placement="right"
             closable={false}
             onClose={this.onClose}
