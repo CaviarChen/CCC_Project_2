@@ -21,7 +21,7 @@ class App extends Component {
     };
   }
 
-  showDrawer = () => {
+  showDrawer = (e) => {
     this.setState({
       visible: true,
     });
@@ -90,12 +90,8 @@ class App extends Component {
       })
     })
 
-    map.on('click', 'suburb-fills', function (e) {
-      new mapboxgl.Popup()
-        .setLngLat(e.lngLat)
-        .setHTML(e.features[0].properties.SA2_NAME16)
-        .addTo(map);
-    });
+
+    map.on('click', 'suburb-fills', this.showDrawer.bind(this));
 
     map.on('mousemove', 'suburb-fills', function (e) {
       if (e.features.length > 0) {
@@ -150,11 +146,7 @@ class App extends Component {
         <Content style={{ padding: '0 50px', marginTop: 68 }}>
           <div>
             <center>
-              <h2>COMP90024 Cluster and Cloud Computing Project 2
-                <Button type="primary" onClick={this.showDrawer}>
-                  Open
-                </Button>
-              </h2>
+              <h2>COMP90024 Cluster and Cloud Computing Project 2</h2>
             </center>
             <div
               style = {{ height: "78vh" }}
