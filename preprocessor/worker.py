@@ -44,7 +44,7 @@ class Worker:
             return
         
         try:
-            self.process_one(job_doc)
+            self.process_one(tweet_type, job_doc)
         except Exception as e:
             self.log("error during processing: ", job_id, e)
             return
@@ -56,12 +56,19 @@ class Worker:
             self.log("unable to finish a job: ", job_id, e)
 
 
-    def process_one(self, job_doc: cloudant.document) -> None:
+    def process_one(self, tweet_type: str, job_doc: cloudant.document) -> None:
         data = {}
 
-        # do all the things and add results to data
+        # process image
+        import image_handler
+        images = image_handler.handle_tweet_media(job_doc["raw"], self, self.db)
 
-        self.db.submit_result(job_doc, data)
+        if images is None:
+            raise Exception("error happened during handle_tweet_media")
+        
+        data["images"] = images
+
+        self.db.submit_result(tweet_type, job_doc, data)
 
     
     def log(self, *args) -> None:
