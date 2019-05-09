@@ -506,6 +506,39 @@
           -37.76779728453277
         ]
       }
+    },
+    {
+      "type": "Feature",
+      "properties": {},
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          144.96665954589844,
+          -37.75062946877242
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {},
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          144.9542999267578,
+          -37.71098578194579
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {},
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          144.9879455566406,
+          -37.711528989518136
+        ]
+      }
     }
   ]
 }

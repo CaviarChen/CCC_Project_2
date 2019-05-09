@@ -7,7 +7,7 @@ import 'mapbox-gl/dist/mapbox-gl.css'
 import AppLayout from './layouts/AppLayout'
 
 import TOKEN from './config.js'
-import * as geoData from './melbourne.geojson'
+import * as geoData from './melbourne_avgpoints.geojson'
 import * as geoPoint from './testPoints.geojson'
 
 var sa2name = null;
@@ -70,10 +70,28 @@ class Map extends Component {
       lng: 144.9631,
       lat: -37.8136,
       zoom: 12,
-      visible: false
+      visible: false,
+      map: null
     };
   }
 
+  onAreaClick = (e) => {
+    this.showDrawer(e)
+    this.state.map.flyTo({
+      // These options control the ending camera position: centered at
+      // the target, at zoom level 9, and north up.
+      center: [e.features[0].properties.AVG_LNG, e.features[0].properties.AVG_LAT],
+      zoom: 12.5,
+      bearing: 0,
+       
+      // These options control the flight curve, making it move
+      // slowly and zoom out almost completely before starting
+      // to pan.
+      speed: 0.5, // make the flying slow
+      curve: 1, // change the speed at which it zooms out
+      });
+  }
+ 
   showDrawer = (e) => {
     sa2name = e.features[0].properties.SA2_NAME16
     this.setState({
@@ -96,6 +114,10 @@ class Map extends Component {
       center: [lng, lat],
       zoom
     });
+
+    this.setState({
+      map: map
+    })
 
     var hoveredStateId = null;
 
@@ -213,12 +235,10 @@ class Map extends Component {
           }
         }
       });
-
-
     })
 
 
-    map.on('click', 'suburb-fills', this.showDrawer.bind(this));
+    map.on('click', 'suburb-fills', this.onAreaClick.bind(this));
 
     map.on('mousemove', 'suburb-fills', function (e) {
       if (e.features.length > 0) {
