@@ -65,3 +65,25 @@ class DBHelper:
         }
         self.client["tweet_data"].create_document(result_doc, True)
 
+    def get_tweet_image_with_yolo(self, url: str) -> Optional[Any]:
+        if url in self.client["tweet_image_with_yolo"]:
+            doc = self.client["tweet_image_with_yolo"][url]
+
+            return {
+                "url": doc["_id"],
+                "yolo": doc["yolo"]
+            }
+        else:
+            return None
+
+
+    def add_tweet_image_with_yolo(self, url: str, yolo: Any, file_content: Any, tweet_id: str) -> None:
+        doc = {
+            '_id': url,
+            'yolo': yolo,
+            'work_node': config.node_id,
+            'time': int(time.time()),
+            'tweet_id': tweet_id
+        }
+        doc = self.client["tweet_image_with_yolo"].create_document(doc, True)
+        doc.put_attachment("small.jpg", "image/jpeg", file_content)
