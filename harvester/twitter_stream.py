@@ -5,6 +5,7 @@ from maintask import MainTask
 import queue
 from typing import *
 from db_helper import DBHelper
+import threading
 import json
 
 
@@ -47,8 +48,7 @@ def listen_stream(maintask: MainTask, auth: tweepy.OAuthHandler, locations: Opti
     q = queue.Queue()
     listener = MyStreamListener(maintask, q)
     
-    twitter_stream = Stream(auth, listener)
-    twitter_stream.filter(locations=locations, is_async=True)
+    threading.Thread(target=listen_stream_work_thread, args=(maintask, auth, locations, listener)).start()
 
     error_count = 0
 
@@ -72,6 +72,14 @@ def listen_stream(maintask: MainTask, auth: tweepy.OAuthHandler, locations: Opti
             if error_count > STREAM_MAX_DB_ERROR_BEFORE_ABORT:
                 maintask.abort()
                 break
+
+def listen_stream_work_thread(maintask: MainTask, auth: tweepy.OAuthHandler, locations: List[float], listener: MyStreamListener) -> None:
+    try:
+        twitter_stream = Stream(auth, listener)
+        twitter_stream.filter(locations=locations)
+    except Exception as e:
+        maintask.log("stream listen error: ", e)
+        maintask.abort()
         
         
 
