@@ -28,6 +28,7 @@ class MyStreamListener(StreamListener):
         self._q.put(status._json)
 
     def on_error(self, status_code: int) -> bool:
+        self._maintask.log("stream: on error ", status_code)
         if status_code == 420:
             #returning False in on_error disconnects the stream
             return False
