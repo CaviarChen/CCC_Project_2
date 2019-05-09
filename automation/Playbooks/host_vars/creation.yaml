@@ -6,27 +6,27 @@ instance_flavor_comm: uom.mse.2c9g
 
 # security_group
 security_groups:
-    - name: os-ccc
-      description: "auto: Security group for CCC"
-      protocol: tcp
-      remote_group: os-ccc
-      remote_ip_prefix: 0.0.0.0/0
-      rules:
-        - port_range_min: 22
-          port_range_max: 22
-        - port_range_min: 80
-          port_range_max: 80
+  name: os-ccc
+  description: "auto: Security group for CCC"
+  protocol: tcp
+  remote_group: os-ccc
+  remote_ip_prefix: 0.0.0.0/0
+  rules:
+    - port_range_min: 22
+      port_range_max: 22
+    - port_range_min: 80
+      port_range_max: 80
 
 # volume
 volumes:
-    - vol_name: alfa-vol
-      vol_size: 63
-    - vol_name: bravo-vol
-      vol_size: 63
-    - vol_name: charlie-vol
-      vol_size: 62
-    - vol_name: delta-vol
-      vol_size: 62
+  - vol_name: alfa-vol
+    vol_size: 63
+  - vol_name: bravo-vol
+    vol_size: 63
+  - vol_name: charlie-vol
+    vol_size: 62
+  - vol_name: delta-vol
+    vol_size: 62
 
 # keypair
 keypair_name_comm: id_nectar
@@ -34,7 +34,7 @@ keypair_public_key_file_comm: /home/ubuntu/.ssh/id_nectar.pub
 
 # instances
 instances:
-    - name: alfa
-    - name: bravo
-    - name: charlie
-    - name: delta
+  - name: alfa
+  - name: bravo
+  - name: charlie
+  - name: delta

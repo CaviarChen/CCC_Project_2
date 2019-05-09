@@ -1,0 +1,37 @@
+---
+- name: Add other nodes to cluster
+  uri:
+    url: http://{{ couchdb_user }}:{{ couchdb_passwd }}@127.0.0.1:5984/_cluster_setup
+    method: POST
+    body_format: json
+    body:
+      - [ "action", "enable_cluster" ]
+      - [ "bind_address", "0.0.0.0" ]
+      - [ "username", "{{ couchdb_user }}" ]
+      - [ "password", "{{ couchdb_passwd }}" ]
+      - [ "node_count", "{{ groups['all'] | length }}" ]
+      - [ "port", 5984 ]
+      - [ "remote_node", "{{ hostvars[item]['ansible_facts']['eth0']['ipv4']['address'] }}" ]
+      - [ "remote_current_user", "{{ couchdb_user }}" ]
+      - [ "remote_current_password", "{{ couchdb_passwd }}" ]
+    loop: "{{ groups['all'] }}"
+
+- uri:
+    url: http://{{ couchdb_user }}:{{ couchdb_passwd }}@127.0.0.1:5984/_cluster_setup
+    method: POST
+    body_format: json
+    body:
+      - [ "action", "add_node"]
+      - [ "host", "{{ hostvars[item]['ansible_facts']['eth0']['ipv4']['address'] }}" ]
+      - [ "port", 5984]
+      - [ "username", "{{ couchdb_user }}" ]
+      - [ "password", "{{ couchdb_passwd }}" ]
+    loop: "{{ groups['all'] }}"
+
+- name: Finishing cluster set up
+  uri:
+    url: http://{{ couchdb_user }}:{{ couchdb_passwd }}@127.0.0.1:5984/_cluster_setup
+    method: POST
+    body_format: json
+    body:
+      - [ "action", "finish_cluster" ]

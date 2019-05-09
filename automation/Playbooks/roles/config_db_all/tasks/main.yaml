@@ -1,0 +1,60 @@
+---
+- name: Config Docker Proxy
+  blockinfile:
+    path: /etc/systemd/system/docker.service.d/http-proxy.conf
+    block: |
+      [Service]
+      Environment="HTTP_PROXY=http://wwwproxy.unimelb.edu.au:8000"
+
+- name: Restart docker damon
+  shell: "systemctl daemon-reload"
+
+- name: Restart Docker
+  systemd:
+    name: docker
+    state: restarted
+
+- name: Pull docker image
+  docker_image:
+      name: couchdb
+      tag: latest
+
+- name: Write CouchDB config File
+  template:
+    src: local_ini.j2
+    dest: /home/ubuntu/local.ini
+
+- name: Run the CouchDB docker
+  docker_container:
+      name: couch
+      image: couchdb:latest
+      detach: yes
+      restart_policy: always
+      log_opt:
+        max-size: "100m"
+      ports:
+        - "5984:5984"
+        - "5986:5986"
+        - "4369:4369"
+        - "9100-9150:9100-9150"
+      env:
+        COUCHDB_USER: "{{ couchdb_user }}"
+        COUCHDB_PASSWORD: "{{ couchdb_passwd }}"
+        NODENAME: "{{ ansible_hostname }}"
+        ERL_FLAGS: '-setcookie "{{ couchdb_cookie }}"'
+      devices:
+        - "/home/ubuntu/local.ini:/opt/couchdb/etc/local.ini"
+        - "/data:/opt/couchdb/data"
+      state: present
+
+- name: Enable cluster on each node
+  uri:
+    url: http://{{ couchdb_user }}:{{ couchdb_passwd }}@127.0.0.1:5984/_cluster_setup
+    method: POST
+    body_format: json
+    body:
+      - [ "action", "enable_cluster" ]
+      - [ "bind_address", "0.0.0.0" ]
+      - [ "username", "{{ couchdb_user }}" ]
+      - [ "password", "{{ couchdb_passwd }}" ]
+      - [ "node_count", "{{ groups['all'] | length }}" ]

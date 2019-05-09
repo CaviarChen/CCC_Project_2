@@ -11,12 +11,9 @@
   changed_when: false
 
 - name: Add Internet Proxy
-  blockinfile:
+  template:
+    src: env.j2
     path: /etc/environment
-    block: |
-      http_proxy="http://wwwproxy.unimelb.edu.au:8000"
-      https_proxy="http://wwwproxy.unimelb.edu.au:8000"
-      ftp_proxy="http://wwwproxy.unimelb.edu.au:8000"
   when: test_proxy_exist.rc == 1
 
 - shell: cat /etc/environment
@@ -74,8 +71,10 @@
     name: docker
     state: started
 
-- name: Add the current user to 'docker' user group
-  shell: usermod -aG docker ${USER}
+- name: Install docker-py
+  pip:
+    name: docker
+    state: latest
 
 - name: Restart SSH
   import_tasks: restart_ssh.yaml
