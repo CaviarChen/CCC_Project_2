@@ -6,7 +6,7 @@
     key_name: "{{ keypair_name_comm }}"
     flavor: "{{ instance_flavor_comm }}"
     availability_zone: "{{ avail_zone_comm }}"
-    security_groups: "{{ os_basic_security_groups }}"
+    security_groups: "{{ os_all_security_groups }}"
     network: "{{ instance_network_comm }}"
     volumes: "{{ item.1 }}"
     auto_floating_ip: yes
