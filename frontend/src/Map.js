@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import mapboxgl from 'mapbox-gl'
-import { Drawer } from 'antd'
+import { Drawer, Collapse } from 'antd'
 import { Radar, Pie } from 'react-chartjs-2'
 import 'mapbox-gl/dist/mapbox-gl.css'
 
@@ -58,6 +58,8 @@ const pieData = {
     ]
   }]
 };
+
+const Panel = Collapse.Panel;
 
 mapboxgl.accessToken = TOKEN;
 
@@ -289,10 +291,18 @@ class Map extends Component {
           onClose={this.onClose}
           visible={this.state.visible}
         >
-          <p>Some contents...</p>
-          <Radar data={radarData} width={150} />
-          <p>Some contents...</p>
-          <Pie data={pieData} width={180} />
+          <Collapse defaultActiveKey={['1', '2']}>
+            <Panel header="This is panel header 1" key="1">
+              <Radar data={radarData} width={150} />
+            </Panel>
+            <Panel header="This is panel header 2" key="2">
+              <Pie data={pieData} width={180} />
+            </Panel>
+            <Panel header="This is panel header 3" key="3">
+            </Panel>
+          </Collapse>
+          
+          
         </Drawer>
       </AppLayout>
     );
