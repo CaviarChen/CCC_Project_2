@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, withRouter } from 'react-router-dom';
-import { Layout, Menu, PageHeader } from 'antd';
+import { Layout, Menu } from 'antd';
 
 const { Header } = Layout;
 

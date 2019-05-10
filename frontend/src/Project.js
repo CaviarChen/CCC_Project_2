@@ -18,13 +18,13 @@ class Project extends Component {
       <AppLayout>
         <Collapse defaultActiveKey={['1']} onChange={callback}>
           <Panel header="Project Description" key="1">
-          <Typography>
-              <Title>Introduction</Title>
+            <Typography>
+              <Title level={2}>Introduction</Title>
               <Paragraph>
-                The software engineering activity builds on the lecture materials describing Cloud systems and especially the UniMelb/NeCTAR Research Cloud and its use of OpenStack; on Instagram data (provided); on Twitter APIs, and CouchDB and the kinds of data analytics (e.g. MapReduce) that CouchDB supports as well as data from the Australian Urban Research Infrastructure Network (AURIN – <a href="https://portal.aurin.org.au">https://portal.aurin.org.au</a>).
+                The software engineering activity builds on the lecture materials describing Cloud systems and especially the UniMelb/NeCTAR Research Cloud and its use of OpenStack; on Instagram data (provided); on Twitter APIs, and CouchDB and the kinds of data analytics (e.g. MapReduce) that CouchDB supports as well as data from the Australian Urban Research Infrastructure Network <a href="https://portal.aurin.org.au" target="_blank" rel="noopener noreferrer">AURIN</a>.
               </Paragraph>
               <Paragraph>
-                The focus of this assignment is to explore the Seven Deadly Sins (<a href="https://en.wikipedia.org/wiki/Seven_deadly_sins">https://en.wikipedia.org/wiki/Seven_deadly_sins</a>) through social media analytics. There has been a huge amount of work on sentiment analysis of social media, e.g. are people happy or sad as recorded by their tweets, but far less work on other aspects of human nature and emotion: greed, lust, laziness etc. Teams will explore one or more deadly sins and collect social media data that captures some aspect of that sin and compares it with official data from AURIN. A few examples of the deadly sins might be:
+                The focus of this assignment is to explore the <a href="https://en.wikipedia.org/wiki/Seven_deadly_sins" target="_blank" rel="noopener noreferrer">Seven Deadly Sins</a> through social media analytics. There has been a huge amount of work on sentiment analysis of social media, e.g. are people happy or sad as recorded by their tweets, but far less work on other aspects of human nature and emotion: greed, lust, laziness etc. Teams will explore one or more deadly sins and collect social media data that captures some aspect of that sin and compares it with official data from AURIN. A few examples of the deadly sins might be:
               </Paragraph>
               <Paragraph>
                 <ul>
@@ -40,17 +40,17 @@ class Project extends Component {
 
               <Divider />
 
-              <Title>About Our Project</Title>
+              <Title level={2}>About Our Project</Title>
               <Paragraph>
                 balabalabalabala
               </Paragraph>
               <Paragraph>
                 balabalabalabala<Text strong>balabalabalabala</Text>。
               </Paragraph>
-              <Title level={2}>balabalabalabala</Title>
+              <Title level={3}>balabalabalabala</Title>
               <Paragraph>
                 balabalabalabala<Text code>balabalabalabala</Text><Text code>balabalabalabala</Text>
-            </Paragraph>
+              </Paragraph>
 
               <Paragraph>
                 <ul>
@@ -75,7 +75,7 @@ class Project extends Component {
                   />
                 </Card>
               </Col>
-              <Col span={4} >
+              <Col span={4}>
                 <Card
                   cover={<img alt="example" src="https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png" />}
                   actions={[<a href="https://github.com/shijiel2" target="_blank" rel="noopener noreferrer"><Icon type="github" style={{ fontSize: '24px' }}/></a>]}
