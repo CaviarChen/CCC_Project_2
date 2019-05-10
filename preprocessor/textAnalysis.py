@@ -11,7 +11,7 @@ def initialize():
     while word:
         word = word.rstrip('\n')
         word_lst.append(word)
-        pair = re.compile('(^|[^\w])' + word + '($|[^\w])')
+        pair = re.compile(r'(^|[^\w])' + word + r'($|[^\w])')
         reg_pairs.append(pair)
         word = fp.readline()
     fp.close()
@@ -33,4 +33,3 @@ def glutonnyWords(text, hashtags):
                 keyWord.append(w)
                 break
     return keyWord
-
