@@ -13,23 +13,18 @@ class Project extends Component {
       console.log(key);
     }
 
-    const text = `This is a very good project.`;
-
     return (
       <AppLayout>
-        <Collapse defaultActiveKey={['1', '3']} onChange={callback}>
+        <Collapse defaultActiveKey={['1']} onChange={callback}>
           <Panel header="Project Description" key="1">
-            <p>{text}</p>
-          </Panel>
-          <Panel header="Something Else" key="2">
-            <p>{text}</p>
+            <p>The focus of this project is to explore the <a href="https://en.wikipedia.org/wiki/Seven_deadly_sins" target="_blank" rel="noopener noreferrer" >Seven Deadly Sins</a> through social meadia analytics.</p>
           </Panel>
           <Panel header="Group Members" key="3">
             <Row type="flex" justify="space-around" align='middle'>
               <Col span={4}>
                 <Card
                   cover={<img alt="example" src="https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png" />}
-                  actions={[<a href="https://github.com/cmjhaha886"><Icon type="github" style={{ fontSize: '24px' }}/></a>]}
+                  actions={[<a href="https://github.com/cmjhaha886" target="_blank" rel="noopener noreferrer"><Icon type="github" style={{ fontSize: '24px' }}/></a>]}
                 >
                   <Meta
                     avatar={<Avatar src="https://github.com/cmjhaha886.png?size=200" />}
@@ -41,7 +36,7 @@ class Project extends Component {
               <Col span={4} >
                 <Card
                   cover={<img alt="example" src="https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png" />}
-                  actions={[<a href="https://github.com/shijiel2"><Icon type="github" style={{ fontSize: '24px' }}/></a>]}
+                  actions={[<a href="https://github.com/shijiel2" target="_blank" rel="noopener noreferrer"><Icon type="github" style={{ fontSize: '24px' }}/></a>]}
                 >
                   <Meta
                     avatar={<Avatar src="https://github.com/shijiel2.png?size=200" />}
@@ -53,7 +48,7 @@ class Project extends Component {
               <Col span={4}>
                 <Card
                   cover={<img alt="example" src="https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png" />}
-                  actions={[<a href="https://github.com/PwzXxm"><Icon type="github" style={{ fontSize: '24px' }}/></a>]}
+                  actions={[<a href="https://github.com/PwzXxm" target="_blank" rel="noopener noreferrer"><Icon type="github" style={{ fontSize: '24px' }}/></a>]}
                 >
                   <Meta
                     avatar={<Avatar src="https://github.com/PwzXxm.png?size=200" />}
@@ -65,7 +60,7 @@ class Project extends Component {
               <Col span={4}>
                 <Card
                   cover={<img alt="example" src="https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png" />}
-                  actions={[<a href="https://github.com/MarsXue"><Icon type="github" style={{ fontSize: '24px' }}/></a>]}
+                  actions={[<a href="https://github.com/MarsXue" target="_blank" rel="noopener noreferrer"><Icon type="github" style={{ fontSize: '24px' }}/></a>]}
                 >
                   <Meta
                     avatar={<Avatar src="https:github.com/MarsXue.png?size=200" />}
@@ -77,7 +72,7 @@ class Project extends Component {
               <Col span={4}>
                 <Card
                   cover={<img alt="example" src="https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png" />}
-                  actions={[<a href="https://github.com/CaviarChen"><Icon type="github" style={{ fontSize: '24px' }}/></a>]}
+                  actions={[<a href="https://github.com/CaviarChen" target="_blank" rel="noopener noreferrer"><Icon type="github" style={{ fontSize: '24px' }}/></a>]}
                 >
                   <Meta
                     avatar={<Avatar src="https://github.com/CaviarChen.png?size=200" />}
