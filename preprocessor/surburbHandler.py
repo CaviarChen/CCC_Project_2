@@ -6,7 +6,7 @@ from shapely.geometry.polygon import Polygon
 geodict = {}
 def initialize():
     global geodict
-    with open('melbourne.geojson') as json_file:
+    with open('./data/melbourne.geojson') as json_file:
         data = json.load(json_file)
         for p in data['features']:
             id = p['id']
