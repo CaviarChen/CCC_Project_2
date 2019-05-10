@@ -1,13 +1,18 @@
 import re
 word_lst = []
+reg_pairs = []
 
 
 def initialize():
     global word_lst
-    fp = open("foodWord.txt", 'r')
+    global reg_pairs
+    fp = open("./data/foodWord.txt", 'r')
     word = fp.readline()
     while word:
-        word_lst.append(word.rstrip('\n'))
+        word = word.rstrip('\n')
+        word_lst.append(word)
+        pair = re.compile('(^|[^\w])' + word + '($|[^\w])')
+        reg_pairs.append(pair)
         word = fp.readline()
     fp.close()
 
@@ -16,22 +21,16 @@ def initialize():
 def glutonnyWords(text, hashtags):
     text = text.lower()
     keyWord = []
-    for w in word_lst:
-        isKeyWord = False
-        if wordInText(text, w):
+    for i in range(len(word_lst)):
+        w = word_lst[i]
+        r = reg_pairs[i]
+        if r.search(text):
             keyWord.append(w)
-            isKeyWord = True
-        if not isKeyWord:
-            for h in hashtags:
-                if wordInText(h, w):
-                    keyWord.append(w)
-                    break
+            continue
+        for h in hashtags:
+            h = h.lower()
+            if r.search(h):
+                keyWord.append(w)
+                break
     return keyWord
 
-
-def wordInText(text, word):
-    reg = '(^|[^\w])' + word + '($|[^\w])'
-    m = re.search(reg, text)
-    if m:
-        return True
-    return False
