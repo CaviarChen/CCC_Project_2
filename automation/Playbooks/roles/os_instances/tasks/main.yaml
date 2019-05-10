@@ -22,3 +22,6 @@
 - debug:
     msg: "Instance with id {{ item.id }} has been created - {{ item.openstack.public_v4 }}"
   loop: "{{ os_instances.results }}"
+
+- pause:
+    minutes: 3

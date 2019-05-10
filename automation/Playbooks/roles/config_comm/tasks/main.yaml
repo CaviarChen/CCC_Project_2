@@ -14,6 +14,7 @@
   template:
     src: env.j2
     dest: /etc/environment
+    force: true
   when: test_proxy_exist.rc == 1
 
 - shell: cat /etc/environment

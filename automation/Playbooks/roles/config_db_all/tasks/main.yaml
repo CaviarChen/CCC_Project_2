@@ -19,6 +19,7 @@
 - name: Config Docker Proxy
   blockinfile:
     path: /etc/systemd/system/docker.service.d/http-proxy.conf
+    create: yes
     block: |
       [Service]
       Environment="HTTP_PROXY=http://wwwproxy.unimelb.edu.au:8000"
@@ -40,38 +41,40 @@
   template:
     src: local_ini.j2
     dest: /home/ubuntu/local.ini
+    force: yes
 
-- name: Run the CouchDB docker
-  docker_container:
-      name: couch
-      image: couchdb:latest
-      detach: yes
-      restart_policy: always
-      log_opt:
-        max-size: "100m"
-      ports:
-        - "5984:5984"
-        - "5986:5986"
-        - "4369:4369"
-        - "9100-9150:9100-9150"
-      env:
-        COUCHDB_USER: "{{ couchdb_user }}"
-        COUCHDB_PASSWORD: "{{ couchdb_passwd }}"
-        NODENAME: "{{ ansible_hostname }}"
-        ERL_FLAGS: '-setcookie "{{ couchdb_cookie }}"'
-      devices:
-        - "/home/ubuntu/local.ini:/opt/couchdb/etc/local.ini"
-        - "/data:/opt/couchdb/data"
-      state: present
+- template:
+    src: vm_args.j2
+    dest: /home/ubuntu/vm.args
+    force: yes
+
+- name: Check if the docker is running
+  shell: "docker start couch"
+  ignore_errors: true
+  no_log: true
+  register: docker_start
+
+- name: Start the CouchDB docker
+  shell: "docker run -p 5984:5984 \
+                -p 5986:5986 \
+                -p 4369:4369 \
+                -p 9100-9150:9100-9150 \
+                -e COUCHDB_USER={{ couchdb_user }} \
+                -e COUCHDB_PASSWORD={{ couchdb_passwd }} \
+                -v /home/ubuntu/vm.args:/opt/couchdb/etc/vm.args \
+                -v /home/ubuntu/local.ini:/opt/couchdb/etc/local.ini \
+                -v /data:/opt/couchdb/data \
+                --name couch \
+                -d couchdb:latest"
+  when: docker_start.rc != 0 
+
+- pause:
+    seconds: 10
 
 - name: Enable cluster on each node
-  uri:
-    url: http://{{ couchdb_user }}:{{ couchdb_passwd }}@127.0.0.1:5984/_cluster_setup
-    method: POST
-    body_format: json
-    body:
-      - [ "action", "enable_cluster" ]
-      - [ "bind_address", "0.0.0.0" ]
-      - [ "username", "{{ couchdb_user }}" ]
-      - [ "password", "{{ couchdb_passwd }}" ]
-      - [ "node_count", "{{ groups['all'] | length }}" ]
+  shell: >
+    curl -X POST -H "Content-Type: application/json"
+    http://{{ couchdb_user }}:{{ couchdb_passwd }}@localhost:5984/_cluster_setup
+    -d '{"action": "enable_cluster", "bind_address":"0.0.0.0",
+    "username": "{{ couchdb_user }}", "password":"{{ couchdb_passwd }}",
+    "node_count":"{{ groups['all'] | length }}"}'

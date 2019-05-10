@@ -14,8 +14,3 @@
   roles:
     - config_comm
     - mount_volumes
-    # - os_server_facts:
-    #     server: alfa
-    # - debug:
-    #     var: openstack_servers
-
