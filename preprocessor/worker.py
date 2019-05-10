@@ -6,6 +6,7 @@ import const
 import surburbHandler
 import textAnalysis
 import traceback
+import random
 
 class Worker:
     def __init__(self, worker_id: int) -> None:
@@ -42,18 +43,20 @@ class Worker:
             job_doc = self.db.lock_process_job(tweet_type, job_id)
         except Exception as e:
             self.log("unable to lock, skip: ", job_id, e)
-            time.sleep(0.1)
+            # random backoff time
+            time.sleep(0.01* random.randint(1, 40))
             return
         
         try:
             self.process_one(tweet_type, job_doc)
         except Exception as e:
-            self.log("error during processing: ", job_id, e, traceback.print_tb(e.__traceback__))
+            self.log("error during processing: ", job_id, e)
             return
         
         # mark as finished
         try:
             self.db.mark_as_finished(job_doc)
+            self.log("job finished: ", job_id)
         except Exception as e:
             self.log("unable to finish a job: ", job_id, e)
 

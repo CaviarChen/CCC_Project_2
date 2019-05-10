@@ -32,7 +32,7 @@ def handle_tweet_media(tweet_json: Dict[str, Any], worker: Worker, db: DBHelper)
         for img in media:
             try:
                 img_url: str = img["media_url_https"]
-                if img_url.startswith("https://pbs.twimg.com/" and img_url.endswith(".jpg")):
+                if img_url.startswith("https://pbs.twimg.com/") and img_url.endswith(".jpg"):
                     worker.log("handle_tweet_media: image", img_url)
 
                     tmp = db.get_tweet_image_with_yolo(img_url)
