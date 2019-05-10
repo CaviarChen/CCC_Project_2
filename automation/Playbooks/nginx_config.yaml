@@ -1,0 +1,9 @@
+---
+- hosts: alfa, bravo
+  gather_facts: true
+  remote_user: ubuntu
+  become: yes
+  become_method: sudo
+
+  roles:
+    - config_load_balancer

@@ -1,0 +1,26 @@
+{% set servers_list = [] %}
+{% for host in groups['all']  %}
+{{ servers_list.append( hostvars[host]['ansible_facts']['eth0']['ipv4']['address'] ) }}
+{% endfor %}
+http {
+    upstream ccc {
+        ip_hash;
+        {{ servers_list | join('\n') }}
+    }
+
+    server {
+        listen 80;
+
+        location / {
+        }
+
+        location /couchdb {
+            rewrite /couchdb/(.*) /$1 break;
+            proxy_pass http://ccc;
+            proxy_redirect off;
+            proxy_buffering off;
+            proxy_set_header Host $host;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        }
+    }
+}
