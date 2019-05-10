@@ -9,7 +9,7 @@ class AppFooter extends Component {
 
   render() {
     return (
-      <Footer className="app-footer" style={{ textAlign: "center" }}>
+      <Footer className="app-footer" style={{ textAlign: "center", height: '50px' }}>
         With love @2019 Created by CMJ, Jason, Mars, Patrick, Zijun
       </Footer>
     );

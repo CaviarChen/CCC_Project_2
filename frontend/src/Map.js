@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import mapboxgl from 'mapbox-gl'
-import { Drawer } from 'antd'
+import { Drawer, PageHeader } from 'antd'
 import { Radar, Pie } from 'react-chartjs-2'
 import 'mapbox-gl/dist/mapbox-gl.css'
 
@@ -67,9 +67,9 @@ class Map extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      lng: 144.9631,
-      lat: -37.8136,
-      zoom: 12,
+      lng: 145.1060,
+      lat: -37.83905,
+      zoom: 7.9,
       visible: false,
       map: null
     };
@@ -78,20 +78,14 @@ class Map extends Component {
   onAreaClick = (e) => {
     this.showDrawer(e)
     this.state.map.flyTo({
-      // These options control the ending camera position: centered at
-      // the target, at zoom level 9, and north up.
       center: [e.features[0].properties.AVG_LNG, e.features[0].properties.AVG_LAT],
       zoom: 12.5,
       bearing: 0,
-       
-      // These options control the flight curve, making it move
-      // slowly and zoom out almost completely before starting
-      // to pan.
-      speed: 0.5, // make the flying slow
-      curve: 1, // change the speed at which it zooms out
-      });
+      speed: 0.4, // make the flying slow
+      curve: 2.2, // change the speed at which it zooms out
+    });
   }
- 
+
   showDrawer = (e) => {
     sa2name = e.features[0].properties.SA2_NAME16
     this.setState({
@@ -132,7 +126,6 @@ class Map extends Component {
         'type': 'geojson',
         'data': geoPoint
       })
-
 
       map.addLayer({
         'id': 'suburb-fills',
@@ -192,11 +185,12 @@ class Map extends Component {
             'interpolate',
             ['linear'],
             ['heatmap-density'],
-            0, 'rgba(236,222,239,0)',
-            0.2, 'rgb(208,209,230)',
-            0.4, 'rgb(166,189,219)',
-            0.6, 'rgb(103,169,207)',
-            0.8, 'rgb(28,144,153)'
+            0, "rgba(33,102,172,0)",
+            0.2, "rgb(103,169,207)",
+            0.4, "rgb(209,229,240)",
+            0.6, "rgb(253,219,199)",
+            0.8, "rgb(239,138,98)",
+            1, "rgb(178,24,43)"
           ],
           // increase radius as zoom increases
           'heatmap-radius': {
@@ -224,7 +218,7 @@ class Map extends Component {
         paint: {
           // increase the radius of the circle as the zoom level and dbh value increases
           'circle-radius': 5,
-          'circle-color': 'rgb(28,144,153)',
+          'circle-color': 'rgb(178,24,43)',
           'circle-stroke-color': 'white',
           'circle-stroke-width': 1,
           'circle-opacity': {
@@ -274,20 +268,22 @@ class Map extends Component {
   }
 
   render() {
+
+    const style = {
+      width: '100%',
+      height: '555px'
+    };
+
     return (
       <AppLayout>
-        <div>
-          <center>
-            <h2>COMP90024 Cluster and Cloud Computing Project 2</h2>
-          </center>
-          <div
-            style={{ height: "78vh" }}
-            ref={el => this.mapContainer = el}
-            className="absolute top right left bottom" />
-        </div>
+        <div
+          style={style}
+          ref={el => this.mapContainer = el}
+          className="mapbox map" />
+
         <Drawer
           title={sa2name}
-          width="500"
+          width="30%"
           placement="right"
           closable={false}
           onClose={this.onClose}

@@ -1,17 +1,17 @@
 import React from 'react';
 import { Link, withRouter } from 'react-router-dom';
-import { Layout, Menu } from 'antd';
+import { Layout, Menu, PageHeader } from 'antd';
 
 const { Header } = Layout;
 
-const AppHeader = withRouter( props => {
+const AppHeader = withRouter(props => {
   const { location } = props;
   return (
-    <Header style={{ zIndex: 1, width: '100%' }}>
+    <Header style={{ zIndex: 1, width: '100%' , height: '48px'}}>
       <Menu
         theme="dark"
         mode="horizontal"
-        style={{ lineHeight: '64px' }}
+        style={{ lineHeight: '48px' }}
         selectedKeys={[location.pathname]}
       >
         <Menu.Item key="/project">

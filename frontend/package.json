@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@mapbox/react-geocoder": "^2.5.0",
     "antd": "^3.17.0",
     "babel-plugin-import": "^1.11.0",
     "chart.js": "^2.8.0",

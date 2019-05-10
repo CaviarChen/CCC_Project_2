@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Layout } from 'antd';
+import { Layout, PageHeader } from 'antd';
 
 import AppHeader from './AppHeader'
 import AppFooter from './AppFooter';
@@ -10,8 +10,11 @@ class AppLayout extends Component {
   render() {
     return (
       <Layout className="app-layout" style={{ height:"100vh" }}>
+      <PageHeader
+          title="COMP90024 Cluster and Cloud Computing Project 2"
+      />
         <AppHeader />
-        <Content style={{ padding: '0 50px', marginTop: 0 }}>
+        <Content style={{ padding: '0 0px', marginTop: 0 }}>
           {this.props.children}
         </Content>
         <AppFooter />
