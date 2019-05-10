@@ -1,11 +1,9 @@
-{% set servers_list = [] %}
-{% for host in groups['all']  %}
-{{ servers_list.append( hostvars[host]['ansible_facts']['eth0']['ipv4']['address'] ) }}
-{% endfor %}
 http {
     upstream ccc {
         ip_hash;
-        {{ servers_list | join('\n') }}
+        {% for host in groups['all']  %}
+            server {{ hostvars[host]['ansible_host'] }}
+        {% endfor %}
     }
 
     server {

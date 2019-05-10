@@ -20,7 +20,7 @@
     docker run
     -v /home/ubuntu/nginx.conf:/etc/nginx/nginx.conf
     --name nginx_ccc
-    -d nginx:latest"
+    -d nginx:latest
   when: nginx_start.rc != 0 
 
 - pause:
