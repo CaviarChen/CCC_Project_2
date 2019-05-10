@@ -44,7 +44,7 @@ class Worker:
         except Exception as e:
             self.log("unable to lock, skip: ", job_id, e)
             # random backoff time
-            time.sleep(0.01* random.randint(1, 40))
+            time.sleep(0.01 * random.randint(1, 40))
             return
         
         try:
