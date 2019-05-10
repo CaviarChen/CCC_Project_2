@@ -73,14 +73,15 @@ class Map extends Component {
       lat: -37.83905,
       zoom: 7.9,
       visible: false,
-      map: null
+      map: null,
+      hasPopup: false
     };
   }
 
   onAreaClick = (e) => {
     this.showDrawer(e)
     this.state.map.flyTo({
-      center: [e.features[0].properties.AVG_LNG, e.features[0].properties.AVG_LAT],
+      center: [e.properties.AVG_LNG, e.properties.AVG_LAT],
       zoom: 12.5,
       bearing: 0,
       speed: 0.4, // make the flying slow
@@ -88,8 +89,22 @@ class Map extends Component {
     });
   }
 
+  onPointClick = (e) => {
+    new mapboxgl.Popup()
+      .setLngLat([e.geometry.coordinates[0], e.geometry.coordinates[1]])
+      .setHTML("description")
+      .addTo(this.state.map);
+    this.state.map.flyTo({
+      center: [e.geometry.coordinates[0], e.geometry.coordinates[1]],
+      zoom: 15,
+      bearing: 0,
+      speed: 0.4, // make the flying slow
+      curve: 2.2, // change the speed at which it zooms out
+    });
+  }
+
   showDrawer = (e) => {
-    sa2name = e.features[0].properties.SA2_NAME16
+    sa2name = e.properties.SA2_NAME16
     this.setState({
       visible: true,
     });
@@ -103,6 +118,7 @@ class Map extends Component {
 
   componentDidMount() {
     const { lng, lat, zoom } = this.state;
+
 
     const map = new mapboxgl.Map({
       container: this.mapContainer,
@@ -234,7 +250,23 @@ class Map extends Component {
     })
 
 
-    map.on('click', 'suburb-fills', this.onAreaClick.bind(this));
+    // map.on('click', 'suburb-fills', this.onAreaClick.bind(this));
+
+    // map.on('click', 'test-point', this.onPointClick.bind(this));
+
+    map.on('click', function(e) {
+      let f = map.queryRenderedFeatures(e.point, { layers: ['test-point'] })
+      if (f.length) {
+        this.onPointClick(f[0])
+      } 
+      else {
+        f = map.queryRenderedFeatures(e.point, { layers: ['suburb-fills'] })
+        if (f.length) {
+          this.onAreaClick(f[0])
+        }
+      }
+      
+    }.bind(this));
 
     map.on('mousemove', 'suburb-fills', function (e) {
       if (e.features.length > 0) {
@@ -301,8 +333,8 @@ class Map extends Component {
             <Panel header="This is panel header 3" key="3">
             </Panel>
           </Collapse>
-          
-          
+
+
         </Drawer>
       </AppLayout>
     );
