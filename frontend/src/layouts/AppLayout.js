@@ -10,8 +10,9 @@ class AppLayout extends Component {
   render() {
     return (
       <Layout className="app-layout" style={{ height:"100vh" }}>
-      <PageHeader
-          title="COMP90024 Cluster and Cloud Computing Project 2"
+      <PageHeader 
+        title="COMP90024 Cluster and Cloud Computing Project 2"
+        subTitle="Team 42"
       />
         <AppHeader />
         <Content style={{ padding: '0 0px', marginTop: 0 }}>

@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import mapboxgl from 'mapbox-gl'
-import { Drawer, PageHeader } from 'antd'
+import { Drawer } from 'antd'
 import { Radar, Pie } from 'react-chartjs-2'
 import 'mapbox-gl/dist/mapbox-gl.css'
 
@@ -271,7 +271,7 @@ class Map extends Component {
 
     const style = {
       width: '100%',
-      height: '555px'
+      height: '650px'
     };
 
     return (
