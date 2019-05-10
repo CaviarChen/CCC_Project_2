@@ -63,7 +63,7 @@
                 -e COUCHDB_PASSWORD={{ couchdb_passwd }} \
                 -v /home/ubuntu/vm.args:/opt/couchdb/etc/vm.args \
                 -v /home/ubuntu/local.ini:/opt/couchdb/etc/local.ini \
-                -v /data:/opt/couchdb/data \
+                -v /data/couchdb:/opt/couchdb/data \
                 --name couch \
                 -d couchdb:latest"
   when: docker_start.rc != 0 

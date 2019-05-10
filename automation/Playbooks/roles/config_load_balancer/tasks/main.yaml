@@ -18,6 +18,7 @@
 - name: Start the CouchDB docker
   shell: >
     docker run
+    -p 8080:8080
     -p 80:80
     -v /home/ubuntu/nginx.conf:/etc/nginx/conf.d/default.conf
     --name nginx_ccc
