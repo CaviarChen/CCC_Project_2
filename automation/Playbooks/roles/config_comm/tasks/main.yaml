@@ -13,7 +13,7 @@
 - name: Add Internet Proxy
   template:
     src: env.j2
-    path: /etc/environment
+    dest: /etc/environment
   when: test_proxy_exist.rc == 1
 
 - shell: cat /etc/environment
@@ -70,11 +70,6 @@
   systemd:
     name: docker
     state: started
-
-- name: Install docker-py
-  pip:
-    name: docker
-    state: latest
 
 - name: Restart SSH
   import_tasks: restart_ssh.yaml

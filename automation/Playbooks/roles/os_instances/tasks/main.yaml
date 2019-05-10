@@ -17,6 +17,7 @@
     - "{{ instances }}"
     - "{{ os_vol_ids }}"
   register: os_instances
+  no_log: true
 
 - debug:
     msg: "Instance with id {{ item.id }} has been created - {{ item.openstack.public_v4 }}"

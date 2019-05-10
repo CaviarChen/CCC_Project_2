@@ -1,4 +1,21 @@
 ---
+- name: Install pip
+  become: yes
+  apt:
+    name: python-pip
+    state: latest
+    update_cache: yes
+
+- name: Update pip
+  pip:
+    name: pip
+    state: latest
+
+- name: Install docker-py
+  pip:
+    name: docker
+    state: latest
+
 - name: Config Docker Proxy
   blockinfile:
     path: /etc/systemd/system/docker.service.d/http-proxy.conf
