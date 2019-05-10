@@ -271,7 +271,7 @@ class Map extends Component {
 
     const style = {
       width: '100%',
-      height: '650px'
+      height: '100%'
     };
 
     return (

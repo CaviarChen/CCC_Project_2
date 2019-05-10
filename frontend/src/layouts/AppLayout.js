@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { Layout, PageHeader } from 'antd';
 
 import AppHeader from './AppHeader'
-import AppFooter from './AppFooter';
 
 const { Content } = Layout
 
@@ -18,7 +17,6 @@ class AppLayout extends Component {
         <Content style={{ padding: '0 0px', marginTop: 0 }}>
           {this.props.children}
         </Content>
-        <AppFooter />
       </Layout>
     );
   }
