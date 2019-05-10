@@ -65,8 +65,27 @@ class Worker:
 
         if images is None:
             raise Exception("error happened during handle_tweet_media")
-        
+        (surburb, longtitude, latitude) = surburbHandler.handle_raw(job_doc["raw"])
         data["images"] = images
+
+        # cmj -----------------------------------------------------------------
+        data["geo"] = {"surburb": surburb,
+                        "longtitude": longtitude
+                        "latitude": latitude}
+        hashtags = []
+        try:
+            doc_hashtags = job_doc["raw"]["entities"]["hashtags"]
+            for dh in doc_hashtags:
+                hashtags.append(dh["text"])
+            text = doc_job["raw"]["text"]
+            time = doc_job["raw"]["created_at"]
+        except Exception as e:
+            self.log("no such field in the twitter document:",e)
+        data["hashtags"]=hashtags
+        data["text"] = text
+        data["time"] = time
+        keyWords = textAnalysis.glutonnyWords(text, hashtags)
+        data["glutonnyWords"] = keyWords
 
         self.db.submit_result(tweet_type, job_doc, data)
 
