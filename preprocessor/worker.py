@@ -3,6 +3,8 @@ from db_helper import DBHelper
 import cloudant
 import time
 import const
+import surburbHandler
+import textAnalysis
 
 class Worker:
     def __init__(self, worker_id: int) -> None:
@@ -19,8 +21,6 @@ class Worker:
             except Exception as e:
                 self.log("unknown error: ", e)
             
-            # TODO: remove this
-            break
             time.sleep(0.2)
 
 
@@ -70,22 +70,28 @@ class Worker:
 
         # cmj -----------------------------------------------------------------
         data["geo"] = {"surburb": surburb,
-                        "longtitude": longtitude
+                        "longtitude": longtitude,
                         "latitude": latitude}
         hashtags = []
         try:
             doc_hashtags = job_doc["raw"]["entities"]["hashtags"]
             for dh in doc_hashtags:
                 hashtags.append(dh["text"])
-            text = doc_job["raw"]["text"]
-            time = doc_job["raw"]["created_at"]
+            text = job_doc["raw"]["text"]
+            time = job_doc["raw"]["created_at"]
+            user_id = job_doc["raw"]["user"]["id_str"]
+            user_name = job_doc["raw"]["user"]["screen_name"]
         except Exception as e:
-            self.log("no such field in the twitter document:",e)
-        data["hashtags"]=hashtags
+            self.log("no such field in the twitter document:", e)
+
+        data["hashtags"] = hashtags
         data["text"] = text
-        data["time"] = time
+        data["created_at"] = time
+        data["user"] = {"id": user_id,
+                        "name": user_name}
         keyWords = textAnalysis.glutonnyWords(text, hashtags)
-        data["glutonnyWords"] = keyWords
+        data["words_of_interest"] = keyWords
+
 
         self.db.submit_result(tweet_type, job_doc, data)
 
