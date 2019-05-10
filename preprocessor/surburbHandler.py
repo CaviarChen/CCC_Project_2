@@ -45,6 +45,6 @@ def whichSurburb(longtitude, latitude):
 
 
 def handle_raw(raw):
-    longtitude = raw['geo']['coordinates'][1]
-    latitude = raw['geo']['coordinates'][0]
+    longtitude = raw['coordinates']['coordinates'][0]
+    latitude = raw['coordinates']['coordinates'][1]
     return whichSurburb(longtitude, latitude), longtitude, latitude
