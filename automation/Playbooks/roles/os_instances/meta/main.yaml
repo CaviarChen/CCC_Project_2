@@ -1,0 +1,5 @@
+dependencies:
+  - { role: os_pre }
+  - { role: os_keypair }
+  - { role: os_security_groups }
+  - { role: os_volumes }
