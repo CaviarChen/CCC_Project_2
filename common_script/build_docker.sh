@@ -18,7 +18,7 @@ function pre {
 printf "1) harvester\n2) importer\n3) pre-processor\ndefault) ALL\n"
 read inpt
 
-case $input in 
+case $inpt in 
     "1")
         harvester
         ;;
