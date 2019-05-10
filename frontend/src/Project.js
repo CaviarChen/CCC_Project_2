@@ -33,7 +33,7 @@ class Project extends Component {
                 >
                   <Meta
                     avatar={<Avatar src="https://github.com/cmjhaha886.png?size=200" />}
-                    title="Mingjian Chen"
+                    title="Minjian Chen"
                     description="Backend"
                   />
                 </Card>
