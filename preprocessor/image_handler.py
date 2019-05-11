@@ -63,7 +63,11 @@ def handle_tweet_media(tweet_json: Dict[str, Any], worker: Worker, db: DBHelper)
 
 def process_a_image(url: str, db: DBHelper, tweet_id: str) -> Dict[str, Any]:
     with tempfile.NamedTemporaryFile(dir=TMP_FOLDER, delete=True, suffix=".jpg") as tmpf:
-        content = requests.get(url + ":small").content
+        res = requests.get(url + ":small")
+        if res.status_code != 200:
+            raise Exception("unable to donwload image")
+
+        content = res.content
         tmpf.write(content)
         tmpf.flush()
         # run yolo
