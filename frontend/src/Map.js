@@ -133,18 +133,18 @@ class Map extends Component {
 
     pieData = {
       labels: [
-        'Unrelated Tweet',
-        'Related Tweet'
+        'Related Tweet',
+        'Unrelated Tweet'
       ],
       datasets: [{
-        data: [e.properties.TOTAL_TWEET-e.properties.RELATED_TWEET, e.properties.RELATED_TWEET],
+        data: [e.properties.RELATED_TWEET, e.properties.TOTAL_TWEET-e.properties.RELATED_TWEET],
         backgroundColor: [
-          '#FF6384',
           '#36A2EB',
+          '#FF6384',
         ],
         hoverBackgroundColor: [
-          '#FF6384',
           '#36A2EB',
+          '#FF6384',
         ]
       }]
     };
@@ -186,18 +186,19 @@ class Map extends Component {
       map: map
     })
 
-    this.loadData(map);
+    
 
     var hoveredStateId = null;
     
 
-    map.on('load', function () {
+    map.on('load', (function () {
 
       map.addSource('suburbs', {
         'type': 'geojson',
         'data': null,
       })
 
+      this.loadData(map);
 
       map.addSource('testPoints', {
         'type': 'geojson',
@@ -333,7 +334,7 @@ class Map extends Component {
       });
     
 
-    })
+    }).bind(this))
 
 
     // map.on('click', 'suburb-fills', this.onAreaClick.bind(this));
