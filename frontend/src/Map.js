@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import mapboxgl from 'mapbox-gl'
-import { Drawer, Collapse } from 'antd'
+import { Drawer, Collapse, Spin } from 'antd'
 import { Radar, Pie } from 'react-chartjs-2'
 import Axios from 'axios';
 import 'mapbox-gl/dist/mapbox-gl.css'
@@ -62,7 +62,6 @@ class Map extends Component {
     };
   }
 
-
   loadData = async (map) => {
 
     const reqs = [];
@@ -72,9 +71,6 @@ class Map extends Component {
     const res = await Axios.all(reqs);
     let adder = res[0].data
     let mel_geo_basic = res[1].data
-
-    console.log(res);
-
 
     let newData = this.appendProperties(mel_geo_basic, adder)
     this.setState({
@@ -99,10 +95,8 @@ class Map extends Component {
 
         if (maxv == null || maxv < basic.features[key-1].properties['RELATED_TWEET_RATIO'])
           maxv = basic.features[key-1].properties['RELATED_TWEET_RATIO']
-
       }
     }
-
     return basic
   }
 
@@ -186,10 +180,7 @@ class Map extends Component {
       map: map
     })
 
-    
-
     var hoveredStateId = null;
-    
 
     map.on('load', (function () {
 
@@ -253,19 +244,6 @@ class Map extends Component {
           "line-opacity": 1
         }
       });
-
-      // map.addLayer({
-      //   'id': 'suburb-symbol',
-      //   'type': 'symbol',
-      //   'source': 'suburbs',
-      //   'layout': {
-      //     "text-field": "{SA2_NAME16}",
-      //     "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
-      //     "text-size": 10
-
-      //   }
-      // })
-
 
       map.addLayer({
         id: 'test-heat',
@@ -332,8 +310,6 @@ class Map extends Component {
           }
         }
       });
-    
-
     }).bind(this))
 
 
@@ -345,8 +321,7 @@ class Map extends Component {
       let f = map.queryRenderedFeatures(e.point, { layers: ['test-point'] })
       if (f.length) {
         this.onPointClick(f[0])
-      } 
-      else {
+      } else {
         f = map.queryRenderedFeatures(e.point, { layers: ['suburb-fills'] })
         if (f.length) {
           this.onAreaClick(f[0])
@@ -372,7 +347,7 @@ class Map extends Component {
             id: hoveredStateId
           }, {
               hover: false
-            });
+          });
         }
         hoveredStateId = e.features[0].id;
         map.setFeatureState({
@@ -380,7 +355,7 @@ class Map extends Component {
           id: hoveredStateId
         }, {
             hover: true
-          });
+        });
       }
     });
 
@@ -391,10 +366,9 @@ class Map extends Component {
           id: hoveredStateId
         }, {
             hover: false
-          });
+        });
       }
     });
-
   }
 
   render() {
@@ -406,6 +380,12 @@ class Map extends Component {
 
     return (
       <AppLayout>
+        <Spin 
+          className="spin" 
+          spinning={this.state.is_loading} 
+          size="large" 
+          tip="Loading..." 
+          style={{ position: "absolute", margin: "auto", top: "50%", left: "50%", zIndex: "1000" }} />
         <div
           style={style}
           ref={el => this.mapContainer = el}
@@ -440,8 +420,6 @@ class Map extends Component {
           visible={this.state.pdvisible}
         >
         </Drawer>
-
-
       </AppLayout>
     );
   }
