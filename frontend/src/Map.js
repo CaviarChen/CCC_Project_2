@@ -92,7 +92,7 @@ class Map extends Component {
   onPointClick = (e) => {
     new mapboxgl.Popup()
       .setLngLat([e.geometry.coordinates[0], e.geometry.coordinates[1]])
-      .setHTML("description")
+      .setHTML("<Radar data={radarData} width='100%' />")
       .addTo(this.state.map);
     this.state.map.flyTo({
       center: [e.geometry.coordinates[0], e.geometry.coordinates[1]],
@@ -268,6 +268,15 @@ class Map extends Component {
       
     }.bind(this));
 
+    map.on('mouseenter', 'test-point', function(e) {
+      // Change the cursor style as a UI indicator.
+      map.getCanvas().style.cursor = 'pointer';
+    });
+
+    map.on('mouseleave', 'test-point', function() {
+      map.getCanvas().style.cursor = '';
+    });
+
     map.on('mousemove', 'suburb-fills', function (e) {
       if (e.features.length > 0) {
         if (hoveredStateId) {
@@ -325,10 +334,10 @@ class Map extends Component {
         >
           <Collapse defaultActiveKey={['1', '2']}>
             <Panel header="This is panel header 1" key="1">
-              <Radar data={radarData} width={150} />
+              <Radar data={radarData} width='100%' />
             </Panel>
             <Panel header="This is panel header 2" key="2">
-              <Pie data={pieData} width={180} />
+              <Pie data={pieData} width='100%' />
             </Panel>
             <Panel header="This is panel header 3" key="3">
             </Panel>
