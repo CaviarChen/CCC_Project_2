@@ -32,7 +32,7 @@
         H_DB_HOST: "{{ docker_DB_HOST }}"
         H_DB_USER: "{{ couchdb_user }}"
         H_DB_TOKEN: "{{ couchdb_passwd }}"
-        H_DB_ADMIN_PARTY: "true"
+        H_DB_ADMIN_PARTY: "false"
         H_GEO_LIMIT: "144.3336,145.8784,-38.5030,-37.1751"
     state: started
 
@@ -50,7 +50,7 @@
         H_DB_HOST: "http://www.ccc.8bits.io:8080"
         H_DB_USER: "{{ couchdb_user }}"
         H_DB_TOKEN: "{{ couchdb_passwd }}"
-        H_DB_ADMIN_PARTY: "true"
+        H_DB_ADMIN_PARTY: "false"
         H_GEO_LIMIT: "144.3336,145.8784,-38.5030,-37.1751"
     state: started
 
@@ -68,6 +68,6 @@
         H_DB_HOST: "http://www.ccc.8bits.io:8080"
         H_DB_USER: "{{ couchdb_user }}"
         H_DB_TOKEN: "{{ couchdb_passwd }}"
-        H_DB_ADMIN_PARTY: "true"
+        H_DB_ADMIN_PARTY: "false"
         H_GEO_LIMIT: "144.3336,145.8784,-38.5030,-37.1751"
     state: started
