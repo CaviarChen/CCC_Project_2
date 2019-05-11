@@ -1,6 +1,6 @@
 ---
 avail_zone_comm: melbourne-qh2-uom
-instance_image_comm: 37788d15-12bd-488c-b15e-903d43eae051
+instance_image_comm: afccf48a-9426-4618-86dc-0ceb636f0169
 instance_network_comm: qh2-uom-internal
 instance_flavor_comm: uom.mse.2c9g
 

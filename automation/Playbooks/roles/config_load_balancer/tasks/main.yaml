@@ -15,7 +15,7 @@
   no_log: true
   register: nginx_start
 
-- name: Start the CouchDB docker
+- name: Start the Nginx docker
   shell: >
     docker run
     -p 8080:8080

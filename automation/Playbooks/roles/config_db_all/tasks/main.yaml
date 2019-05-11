@@ -55,7 +55,9 @@
   register: docker_start
 
 - name: Start the CouchDB docker
-  shell: "docker run -p 5984:5984 \
+  shell: "docker run \
+                --restart=always \
+                -p 5984:5984 \
                 -p 5986:5986 \
                 -p 4369:4369 \
                 -p 9100-9150:9100-9150 \
