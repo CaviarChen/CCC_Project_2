@@ -1,0 +1,11 @@
+---
+- hosts: alfa, bravo
+  vars_files:
+    - host_vars/comm_config_vars.yaml
+  gather_facts: true
+  remote_user: ubuntu
+  become: yes
+  become_method: sudo
+
+  roles:
+    - config_load_balancer

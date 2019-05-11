@@ -2,6 +2,7 @@ import cloudant
 from cloudant.client import CouchDB
 import time
 from typing import *
+import random
 
 import const
 
@@ -27,10 +28,13 @@ class DBHelper:
             }
         query = cloudant.query.Query(self.client[db_name], \
             selector=selector, fields=['_id'])
-        if len(query(limit=1)["docs"]) == 0:
+        ans = query(limit=const.FETCH_JOB_COUNT)["docs"]
+        if len(ans) == 0:
             # no more jobs
             return None
-        return query(limit=1)["docs"][0]["_id"]
+
+        # reduce conflict ratio
+        return random.choice(ans)["_id"]
 
 
     def lock_process_job(self, db_name: str, id: str) -> cloudant.document:

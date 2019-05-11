@@ -1,0 +1,32 @@
+---
+- hosts: all
+  vars_files:
+    - host_vars/comm_config_vars.yaml
+    - host_vars/db_config_vars.yaml
+    - host_vars/vault_vars.yaml
+  gather_facts: true
+  remote_user: ubuntu
+  become: yes
+  become_method: sudo
+
+  pre_tasks:
+    - name: Install Python2
+      raw: sudo apt update; sudo apt -y install python
+
+  roles:
+    - config_comm
+    - mount_volumes
+    - config_db_all
+
+- hosts: alfa
+  vars_files:
+    - host_vars/comm_config_vars.yaml
+    - host_vars/db_config_vars.yaml
+    - host_vars/vault_vars.yaml
+  gather_facts: true
+  remote_user: ubuntu
+  become: yes
+  become_method: sudo
+
+  roles:
+    - config_db_master

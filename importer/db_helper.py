@@ -2,7 +2,7 @@ import cloudant
 from cloudant.client import CouchDB
 import time
 from typing import *
-
+import random
 import const
 
 import config
@@ -53,8 +53,6 @@ class DBHelper:
         return False
 
     def get_import_job(self) -> Optional[str]:
-        # TODO: index?
-
         selector = {
             'finished': {
                 '$eq': False
@@ -65,10 +63,15 @@ class DBHelper:
             }
         query = cloudant.query.Query(self.client["import_job"], \
             selector=selector, fields=['_id'])
-        if len(query(limit=1)["docs"]) == 0:
+
+        ans = query(limit=const.FETCH_JOB_COUNT)["docs"]
+        if len(ans) == 0:
             # no more jobs
             return None
-        return query(limit=1)["docs"][0]["_id"]
+
+        # reduce conflict ratio
+        return random.choice(ans)["_id"]
+
 
     def lock_import_job(self, id: str) -> cloudant.document:
         # try to lock this job

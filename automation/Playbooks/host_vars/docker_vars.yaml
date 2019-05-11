@@ -1,0 +1,12 @@
+---
+docker_private_registry: registry.gitlab.com
+
+docker_private_email: "{{ vault_docker_private_email }}"
+docker_private_user: "{{ vault_docker_private_user }}"
+docker_private_passwd: "{{ vault_docker_private_passwd }}"
+docker_DB_HOST: "{{ vault_docker_DB_HOST }}"
+
+docker_images_name:
+    - harvester
+    - importer
+    - preprocessor

@@ -3,6 +3,10 @@ from db_helper import DBHelper
 import cloudant
 import time
 import const
+import surburbHandler
+import textAnalysis
+import traceback
+import random
 
 class Worker:
     def __init__(self, worker_id: int) -> None:
@@ -19,8 +23,6 @@ class Worker:
             except Exception as e:
                 self.log("unknown error: ", e)
             
-            # TODO: remove this
-            break
             time.sleep(0.2)
 
 
@@ -41,6 +43,8 @@ class Worker:
             job_doc = self.db.lock_process_job(tweet_type, job_id)
         except Exception as e:
             self.log("unable to lock, skip: ", job_id, e)
+            # random backoff time
+            time.sleep(0.01 * random.randint(1, 40))
             return
         
         try:
@@ -52,6 +56,7 @@ class Worker:
         # mark as finished
         try:
             self.db.mark_as_finished(job_doc)
+            self.log("job finished: ", job_id)
         except Exception as e:
             self.log("unable to finish a job: ", job_id, e)
 
@@ -65,8 +70,33 @@ class Worker:
 
         if images is None:
             raise Exception("error happened during handle_tweet_media")
-        
+        (surburb, longtitude, latitude) = surburbHandler.handle_raw(job_doc["raw"])
         data["images"] = images
+
+        # cmj -----------------------------------------------------------------
+        data["geo"] = {"surburb": surburb,
+                        "longtitude": longtitude,
+                        "latitude": latitude}
+        hashtags = []
+        try:
+            doc_hashtags = job_doc["raw"]["entities"]["hashtags"]
+            for dh in doc_hashtags:
+                hashtags.append(dh["text"])
+            text = job_doc["raw"]["text"]
+            time = job_doc["raw"]["created_at"]
+            user_id = job_doc["raw"]["user"]["id_str"]
+            user_name = job_doc["raw"]["user"]["screen_name"]
+        except Exception as e:
+            self.log("no such field in the twitter document:", e)
+
+        data["hashtags"] = hashtags
+        data["text"] = text
+        data["created_at"] = time
+        data["user"] = {"id": user_id,
+                        "name": user_name}
+        keyWords = textAnalysis.glutonnyWords(text, hashtags)
+        data["words_of_interest"] = keyWords
+
 
         self.db.submit_result(tweet_type, job_doc, data)
 

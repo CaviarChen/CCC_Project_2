@@ -1,0 +1,76 @@
+---
+- name: Gather facts of remote hosts
+  setup:
+    gather_subset: all
+
+# set up proxy
+- name: Test if Proxy setting already exist
+  shell: grep "^http_proxy" /etc/environment
+  register: test_proxy_exist
+  failed_when: "test_proxy_exist.rc == 2"
+  changed_when: false
+
+- name: Add Internet Proxy
+  template:
+    src: env.j2
+    dest: /etc/environment
+    force: true
+  when: test_proxy_exist.rc == 1
+
+- shell: cat /etc/environment
+  register: env_content
+
+- debug:
+    var: env_content.stdout_lines
+
+- name: Restart SSH
+  import_tasks: restart_ssh.yaml
+
+# set up timezone
+- name: Change timezone to Australia/Melbourne
+  timezone:
+    name: Australia/Melbourne
+
+- name: Restart Cron
+  service:
+    name: cron
+    state: restarted
+
+# add ntp sync
+- name: Turn on NTP sync
+  shell: timedatectl set-ntp on
+
+# Docker
+- name: Install dependencies
+  apt:
+    name: ['apt-transport-https', 'ca-certificates', 'curl', 'python-setuptools', 'software-properties-common']
+    state: latest
+    update_cache: yes
+    install_recommends: no
+
+- name: Add Docker apt repo key
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
+- name: Add Docker apt repo
+  apt_repository:
+    repo: "deb [arch=amd64] https://download.docker.com/linux/{{ ansible_distribution | lower }} {{ ansible_distribution_release | lower }} stable"
+    mode: 644
+    update_cache: yes
+    state: present
+
+- name: Install Docker
+  apt:
+    name: ['docker-ce']
+    state: latest
+    update_cache: yes
+    install_recommends: no
+
+- name: Check is the Docker running
+  systemd:
+    name: docker
+    state: started
+
+- name: Restart SSH
+  import_tasks: restart_ssh.yaml
