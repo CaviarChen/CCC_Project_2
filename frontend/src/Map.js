@@ -160,11 +160,24 @@ class Map extends Component {
         'type': 'fill',
         'source': 'suburbs',
         "paint": {
-          'fill-color': '#094183',
+          'fill-color':[
+            'interpolate',
+            ['linear'],
+            ['get', 'SA2_5DIG16'],
+            0, '#F2F12D',
+            21105, '#EED322',
+            21106, '#E6B71E',
+            21107, '#DA9C20',
+            21108, '#CA8323',
+            5000000, '#B86B25',
+            7500000, '#A25626',
+            10000000, '#8B4225',
+            25000000, '#723122'
+            ],
           "fill-opacity": ["case",
             ["boolean", ["feature-state", "hover"], false],
-            0.5,
-            0
+            0.8,
+            0.5
           ]
         }
       });
@@ -174,7 +187,7 @@ class Map extends Component {
         'type': 'line',
         'source': 'suburbs',
         "paint": {
-          "line-color": "#094183",
+          "line-color": "#8B4225",
           "line-width": 0.5,
           "line-opacity": 1
         }
@@ -231,6 +244,7 @@ class Map extends Component {
           'heatmap-opacity': {
             default: 1,
             stops: [
+              [5, 0.5],
               [14, 1],
               [15, 0]
             ]
@@ -245,7 +259,7 @@ class Map extends Component {
         minzoom: 14,
         paint: {
           // increase the radius of the circle as the zoom level and dbh value increases
-          'circle-radius': 5,
+          'circle-radius': 7,
           'circle-color': 'rgb(178,24,43)',
           'circle-stroke-color': 'white',
           'circle-stroke-width': 1,
@@ -257,6 +271,8 @@ class Map extends Component {
           }
         }
       });
+    
+
     })
 
 
@@ -344,10 +360,10 @@ class Map extends Component {
         >
           <Collapse defaultActiveKey={['1', '2']}>
             <Panel header="This is panel header 1" key="1">
-              <Radar data={radarData} width='100%' />
+              <Radar data={radarData} width={100} />
             </Panel>
             <Panel header="This is panel header 2" key="2">
-              <Pie data={pieData} width='100%' />
+              <Pie data={pieData} width={100} />
             </Panel>
             <Panel header="This is panel header 3" key="3">
             </Panel>
