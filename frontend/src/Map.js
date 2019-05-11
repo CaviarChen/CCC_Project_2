@@ -40,26 +40,7 @@ const radarData = {
   ]
 };
 
-const pieData = {
-  labels: [
-    'Red',
-    'Green',
-    'Yellow'
-  ],
-  datasets: [{
-    data: [300, 50, 100],
-    backgroundColor: [
-      '#FF6384',
-      '#36A2EB',
-      '#FFCE56'
-    ],
-    hoverBackgroundColor: [
-      '#FF6384',
-      '#36A2EB',
-      '#FFCE56'
-    ]
-  }]
-};
+var pieData = null
 
 const Panel = Collapse.Panel;
 
@@ -104,14 +85,24 @@ class Map extends Component {
   }
 
   appendProperties = (basic, adder) => {
+    let minv = null, maxv = null;
+
     for (let i = 0; i < adder.rows.length; i++){
       let key = adder.rows[i].key
       if(key > 0 && key < 310) {
         basic.features[key-1].properties['TOTAL_TWEET'] = adder.rows[i].value[1]
         basic.features[key-1].properties['RELATED_TWEET'] = adder.rows[i].value[0]
-        basic.features[key-1].properties['RELATED_TWEET_RATIO'] = adder.rows[i].value[0] / adder.rows[i].value[1]
+        basic.features[key-1].properties['RELATED_TWEET_RATIO'] = adder.rows[i].value[0] / adder.rows[i].value[1] * 1.8;
+        
+        if (minv == null || minv > basic.features[key-1].properties['RELATED_TWEET_RATIO'])
+          minv = basic.features[key-1].properties['RELATED_TWEET_RATIO']
+
+        if (maxv == null || maxv < basic.features[key-1].properties['RELATED_TWEET_RATIO'])
+          maxv = basic.features[key-1].properties['RELATED_TWEET_RATIO']
+
       }
     }
+
     return basic
   }
 
@@ -139,6 +130,25 @@ class Map extends Component {
 
   showDrawer = (e) => {
     sa2name = e.properties.SA2_NAME16
+
+    pieData = {
+      labels: [
+        'Unrelated Tweet',
+        'Related Tweet'
+      ],
+      datasets: [{
+        data: [e.properties.TOTAL_TWEET-e.properties.RELATED_TWEET, e.properties.RELATED_TWEET],
+        backgroundColor: [
+          '#FF6384',
+          '#36A2EB',
+        ],
+        hoverBackgroundColor: [
+          '#FF6384',
+          '#36A2EB',
+        ]
+      }]
+    };
+
     this.setState({
       advisible: true,
     });
@@ -211,8 +221,19 @@ class Map extends Component {
             0.5, '#B86B25',
             0.6, '#A25626',
             0.7, '#8B4225',
-            0.8, '#723122'
+            0.8, '#723122',
+            0.9, '#512015',
+            1,   '#000000'
             ],
+          // 'fill-color': [
+          //   "rgb",
+          //   // red is higher when feature.properties.temperature is higher
+          //   ["get", "COLOR_RATIO"],
+          //   // green is always zero
+          //   200,
+          //   // blue is higher when feature.properties.temperature is lower
+          //   ["-", 255, ["get", "COLOR_RATIO"]]
+        // ],
           "fill-opacity": ["case",
             ["boolean", ["feature-state", "hover"], false],
             0.8,
