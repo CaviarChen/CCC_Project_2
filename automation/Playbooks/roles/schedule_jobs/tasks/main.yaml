@@ -8,6 +8,7 @@
 - name: Pull new images 
   docker_image:
     name: registry.gitlab.com/{{ docker_private_user }}/ccc_project_2/{{ item }}:latest
+    force: yes
     tag: latest
   loop: "{{ docker_images_name }}"
 
