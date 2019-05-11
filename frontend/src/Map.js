@@ -72,7 +72,8 @@ class Map extends Component {
       lng: 145.1060,
       lat: -37.83905,
       zoom: 7.9,
-      visible: false,
+      advisible: false,
+      pdvisible: false,
       map: null,
       hasPopup: false
     };
@@ -90,10 +91,7 @@ class Map extends Component {
   }
 
   onPointClick = (e) => {
-    new mapboxgl.Popup()
-      .setLngLat([e.geometry.coordinates[0], e.geometry.coordinates[1]])
-      .setHTML("<Radar data={radarData} width='100%' />")
-      .addTo(this.state.map);
+    this.showPdDrawer(e)
     this.state.map.flyTo({
       center: [e.geometry.coordinates[0], e.geometry.coordinates[1]],
       zoom: 15,
@@ -106,13 +104,25 @@ class Map extends Component {
   showDrawer = (e) => {
     sa2name = e.properties.SA2_NAME16
     this.setState({
-      visible: true,
+      advisible: true,
     });
   };
 
   onClose = () => {
     this.setState({
-      visible: false,
+      advisible: false,
+    });
+  };
+
+  showPdDrawer = (e) => {
+    this.setState({
+      pdvisible: true,
+    });
+  };
+
+  onPdClose = () => {
+    this.setState({
+      pdvisible: false,
     });
   };
 
@@ -330,7 +340,7 @@ class Map extends Component {
           placement="right"
           closable={false}
           onClose={this.onClose}
-          visible={this.state.visible}
+          visible={this.state.advisible}
         >
           <Collapse defaultActiveKey={['1', '2']}>
             <Panel header="This is panel header 1" key="1">
@@ -342,9 +352,19 @@ class Map extends Component {
             <Panel header="This is panel header 3" key="3">
             </Panel>
           </Collapse>
-
-
         </Drawer>
+
+        <Drawer
+          title='balabalabala'
+          width="30%"
+          placement="right"
+          closable={false}
+          onClose={this.onPdClose}
+          visible={this.state.pdvisible}
+        >
+        </Drawer>
+
+
       </AppLayout>
     );
   }
