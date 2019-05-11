@@ -3,6 +3,7 @@ import tweepy
 from maintask import MainTask
 import const
 import time
+import random
 from db_helper import DBHelper
 
 
@@ -24,7 +25,9 @@ def harvest_user_tweets(maintask: MainTask, auth: tweepy.OAuthHandler) -> None:
         except Exception as e:
             # someone else taken this job, go to next one
             maintask.log("user tweets: unable to lock", _id, e)
-            maintask.sleep(1)
+
+            # random backoff time
+            time.sleep(0.1* random.randint(1, 40))
             continue
         
         maintask.log("user tweets: job got ", _id)

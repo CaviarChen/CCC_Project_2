@@ -1,0 +1,26 @@
+---
+- name: Create security groups for CouchDB 
+  os_security_group:
+    name: "{{ security_groups.name }}"
+    description: "{{ security_groups.description }}"
+    state: present
+
+- set_fact:
+    os_all_security_groups: "{{ [ security_groups.name ] }}"
+
+- name: Create security rules for all instances under this security group
+  os_security_group_rule:
+    security_group: "{{ security_groups.name }}"
+    protocol: "{{ security_groups.protocol }}"
+    remote_group: "{{ security_groups.remote_group }}"
+    state: present
+  
+- name: Create security rules for public ingress
+  os_security_group_rule:
+    security_group: "{{ security_groups.name }}"
+    protocol: "{{ security_groups.protocol }}"
+    port_range_min: "{{ item.port_range_min }}"
+    port_range_max: "{{ item.port_range_max }}"
+    remote_ip_prefix: "{{ security_groups.remote_ip_prefix }}"
+    state: present
+  loop: "{{ security_groups.rules }}"

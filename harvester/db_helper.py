@@ -4,6 +4,7 @@ import time
 from typing import *
 
 import const
+import random
 
 import config
 
@@ -52,8 +53,6 @@ class DBHelper:
 
     # find one user that haven't been harvested in X hours
     def get_user_harvest_job(self) -> Optional[str]:
-        # TODO: index?
-
         selector = {
             'last_harvest': {
                 '$lt': int(time.time()) - const.USER_HARVEST_INTERVAL
@@ -61,10 +60,13 @@ class DBHelper:
             }
         query = cloudant.query.Query(self.client["harvest_twitter_user"], \
             selector=selector, fields=['_id'])
-        if len(query(limit=1)["docs"]) == 0:
+        ans = query(limit=const.FETCH_JOB_COUNT)["docs"]
+        if len(ans) == 0:
             # no more jobs
             return None
-        return query(limit=1)["docs"][0]["_id"]
+
+        # reduce conflict ratio
+        return random.choice(ans)["_id"]
     
     def lock_user_harvest_job(self, id: str) -> cloudant.document:
         # try to lock this job

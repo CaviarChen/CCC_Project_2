@@ -1,0 +1,11 @@
+---
+- name: Create a Keypair
+  os_keypair:
+    name: "{{ keypair_name_comm }}"
+    public_key_file: "{{ keypair_public_key_file_comm }}"
+    timeout: 600
+    wait: yes
+    state: present
+
+- debug:
+    msg: "Keypair(s) ({{ keypair_name_comm }}) has been created"

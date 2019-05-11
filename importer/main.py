@@ -7,6 +7,7 @@ import const
 import cloudant
 import subprocess
 import json
+import random
 from typing import *
 
 def execute_one() -> None:
@@ -24,6 +25,9 @@ def execute_one() -> None:
             job_doc = db.lock_import_job(job_id)
         except Exception as e:
             log("unable to lock, skip: ", e)
+
+            # random backoff time
+            time.sleep(0.01 * random.randint(1, 40))
             return
         
         try:

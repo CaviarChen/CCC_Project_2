@@ -1,0 +1,72 @@
+---
+- name: Login to private Docker registry
+  docker_login:
+    registry: "{{ docker_private_registry }}"
+    username: "{{ docker_private_user }}"
+    password: "{{ docker_private_passwd }}"
+
+- name: Pull new images 
+  docker_image:
+    name: registry.gitlab.com/{{ docker_private_user }}/ccc_project_2/{{ item }}:latest
+    tag: latest
+  loop: "{{ docker_images_name }}"
+
+- name: Stop and remove running container
+  docker_container:
+    name: "{{ item }}_{{ ansible_hostname }}"
+    state: absent
+  loop: "{{ docker_images_name }}"
+
+- name: Start harvesters dockers
+  docker_container:
+    name: harvester_{{ ansible_hostname }}
+    image: registry.gitlab.com/{{ docker_private_user }}/ccc_project_2/harvester:latest
+    restart_policy: always
+    env:
+        HTTP_PROXY: "http://wwwproxy.unimelb.edu.au:8000"
+        HTTPS_PROXY: "http://wwwproxy.unimelb.edu.au:8000"
+        FTP_PROXY: "http://wwwproxy.unimelb.edu.au:8000"
+        NO_PROXY: "localhost, 127.0.0.1, ccc.8bits.io"
+        H_NODE_ID: "{{ ansible_hostname }}"
+        H_DB_HOST: "{{ docker_DB_HOST }}"
+        H_DB_USER: "{{ couchdb_user }}"
+        H_DB_TOKEN: "{{ couchdb_passwd }}"
+        H_DB_ADMIN_PARTY: "true"
+        H_GEO_LIMIT: "144.3336,145.8784,-38.5030,-37.1751"
+    state: started
+
+- name: Start importer dockers
+  docker_container:
+    name: importer_{{ ansible_hostname }}
+    image: registry.gitlab.com/{{ docker_private_user }}/ccc_project_2/importer:latest
+    restart_policy: always
+    env:
+        HTTP_PROXY: "http://wwwproxy.unimelb.edu.au:8000"
+        HTTPS_PROXY: "http://wwwproxy.unimelb.edu.au:8000"
+        FTP_PROXY: "http://wwwproxy.unimelb.edu.au:8000"
+        NO_PROXY: "localhost, 127.0.0.1, ccc.8bits.io"
+        H_NODE_ID: "{{ ansible_hostname }}"
+        H_DB_HOST: "http://www.ccc.8bits.io:8080"
+        H_DB_USER: "{{ couchdb_user }}"
+        H_DB_TOKEN: "{{ couchdb_passwd }}"
+        H_DB_ADMIN_PARTY: "true"
+        H_GEO_LIMIT: "144.3336,145.8784,-38.5030,-37.1751"
+    state: started
+
+- name: Start preprocessor dockers
+  docker_container:
+    name: preprocessor_{{ ansible_hostname }}
+    image: registry.gitlab.com/{{ docker_private_user }}/ccc_project_2/preprocessor:latest
+    restart_policy: always
+    env:
+        HTTP_PROXY: "http://wwwproxy.unimelb.edu.au:8000"
+        HTTPS_PROXY: "http://wwwproxy.unimelb.edu.au:8000"
+        FTP_PROXY: "http://wwwproxy.unimelb.edu.au:8000"
+        NO_PROXY: "localhost, 127.0.0.1, ccc.8bits.io"
+        H_NODE_ID: "{{ ansible_hostname }}"
+        H_DB_HOST: "http://www.ccc.8bits.io:8080"
+        H_DB_USER: "{{ couchdb_user }}"
+        H_DB_TOKEN: "{{ couchdb_passwd }}"
+        H_DB_ADMIN_PARTY: "true"
+        H_GEO_LIMIT: "144.3336,145.8784,-38.5030,-37.1751"
+    state: started
