@@ -13,10 +13,32 @@ class DBHelper:
         self.client = CouchDB(config.couchdb_user, config.couchdb_auth_token, \
             url=config.couchdb_host, admin_party=config.couchdb_admin_party, connect=True)
         self.node_id = config.node_id
+
+        self.process_job_prefer_db = "import_twitter_tweet"
     
 
-    def get_process_job(self, db_name: str) -> Optional[str]:
-        # TODO: index?
+                                                # db_name, job_id, need to slow down
+    def get_process_job(self) -> Optional[Tuple[str, str, bool]]:
+        res = self._get_process_job(self.process_job_prefer_db)
+        if res is not None:
+            return (self.process_job_prefer_db, res[0], res[1])
+        
+        if self.process_job_prefer_db == "import_twitter_tweet":
+            self.process_job_prefer_db = "harvest_twitter_tweet"
+        else:
+            self.process_job_prefer_db = "import_twitter_tweet"
+        
+        res = self._get_process_job(self.process_job_prefer_db)
+        if res is not None:
+            print("======= switch db =======")
+            return (self.process_job_prefer_db, res[0], res[1])
+        
+        # no job
+        return None
+
+
+                                                            # job_id, need to slow down
+    def _get_process_job(self, db_name: str) -> Optional[Tuple[str, bool]]:
 
         selector = {
             'process_meta.processed': {
@@ -34,7 +56,7 @@ class DBHelper:
             return None
 
         # reduce conflict ratio
-        return random.choice(ans)["_id"]
+        return (random.choice(ans)["_id"], len(ans) < const.FETCH_JOB_COUNT)
 
 
     def lock_process_job(self, db_name: str, id: str) -> cloudant.document:

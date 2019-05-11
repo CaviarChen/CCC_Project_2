@@ -28,15 +28,18 @@ class Worker:
 
     def handle_one(self) -> None:
         # get job
-        tweet_type = "harvest_twitter_tweet"
-        job_id = self.db.get_process_job(tweet_type)
-        if job_id is None:
-            tweet_type = "import_twitter_tweet"
-            job_id = self.db.get_process_job(tweet_type)
-            if job_id is None:
-                print("no job, wait")
-                time.sleep(const.NO_JOB_WAIT)
-                return
+        res = self.db.get_process_job()
+        if res is None:
+            print("no job, wait")
+            time.sleep(const.NO_JOB_WAIT)
+            return
+        
+        if res[2]:
+            print("slow down")
+            time.sleep(const.SLOW_DOWN_WAIT)
+
+        tweet_type = res[0]
+        job_id = res[1]
 
         # lock job
         try:
@@ -56,7 +59,7 @@ class Worker:
         # mark as finished
         try:
             self.db.mark_as_finished(job_doc)
-            self.log("job finished: ", job_id)
+            self.log("job finished: ", tweet_type, job_id)
         except Exception as e:
             self.log("unable to finish a job: ", job_id, e)
 
