@@ -2,13 +2,15 @@ import React, { Component } from 'react'
 import mapboxgl from 'mapbox-gl'
 import { Drawer, Collapse } from 'antd'
 import { Radar, Pie } from 'react-chartjs-2'
+import Axios from 'axios';
 import 'mapbox-gl/dist/mapbox-gl.css'
 
 import AppLayout from './layouts/AppLayout'
 
 import TOKEN from './config.js'
-import * as geoData from './melbourne_avgpoints.geojson'
+import * as mel_geo_basic_url from './melbourne_avgpoints.geojson'
 import * as geoPoint from './testPoints.geojson'
+
 
 var sa2name = null;
 
@@ -75,8 +77,42 @@ class Map extends Component {
       advisible: false,
       pdvisible: false,
       map: null,
-      hasPopup: false
+      is_loading: true
     };
+  }
+
+
+  loadData = async (map) => {
+
+    const reqs = [];
+    reqs.push(Axios.get("http://www.ccc.8bits.io:8080/tweet_data/_design/designDoc/_view/get_surburb_summary?group=true"));
+    reqs.push(Axios.get(mel_geo_basic_url));
+
+    const res = await Axios.all(reqs);
+    let adder = res[0].data
+    let mel_geo_basic = res[1].data
+
+    console.log(res);
+
+
+    let newData = this.appendProperties(mel_geo_basic, adder)
+    this.setState({
+      is_loading: false,
+    });
+
+    map.getSource('suburbs').setData(newData);
+  }
+
+  appendProperties = (basic, adder) => {
+    for (let i = 0; i < adder.rows.length; i++){
+      let key = adder.rows[i].key
+      if(key > 0 && key < 310) {
+        basic.features[key-1].properties['TOTAL_TWEET'] = adder.rows[i].value[1]
+        basic.features[key-1].properties['RELATED_TWEET'] = adder.rows[i].value[0]
+        basic.features[key-1].properties['RELATED_TWEET_RATIO'] = adder.rows[i].value[0] / adder.rows[i].value[1]
+      }
+    }
+    return basic
   }
 
   onAreaClick = (e) => {
@@ -129,7 +165,6 @@ class Map extends Component {
   componentDidMount() {
     const { lng, lat, zoom } = this.state;
 
-
     const map = new mapboxgl.Map({
       container: this.mapContainer,
       style: 'mapbox://styles/shijiel2/cjvcb640p3oag1gjufck6jcio',
@@ -141,14 +176,18 @@ class Map extends Component {
       map: map
     })
 
+    this.loadData(map);
+
     var hoveredStateId = null;
+    
 
     map.on('load', function () {
 
       map.addSource('suburbs', {
         'type': 'geojson',
-        'data': geoData
+        'data': null,
       })
+
 
       map.addSource('testPoints', {
         'type': 'geojson',
@@ -163,16 +202,16 @@ class Map extends Component {
           'fill-color':[
             'interpolate',
             ['linear'],
-            ['get', 'SA2_5DIG16'],
+            ['get', 'RELATED_TWEET_RATIO'],
             0, '#F2F12D',
-            21105, '#EED322',
-            21106, '#E6B71E',
-            21107, '#DA9C20',
-            21108, '#CA8323',
-            5000000, '#B86B25',
-            7500000, '#A25626',
-            10000000, '#8B4225',
-            25000000, '#723122'
+            0.1, '#EED322',
+            0.2, '#E6B71E',
+            0.3, '#DA9C20',
+            0.4, '#CA8323',
+            0.5, '#B86B25',
+            0.6, '#A25626',
+            0.7, '#8B4225',
+            0.8, '#723122'
             ],
           "fill-opacity": ["case",
             ["boolean", ["feature-state", "hover"], false],
