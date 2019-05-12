@@ -40,5 +40,6 @@ case $inpt in
         harvester
         importer
         pre
+        go_backend
         ;;
 esac
