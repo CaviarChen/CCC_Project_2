@@ -3,7 +3,7 @@ from cloudant.client import CouchDB
 import time
 from typing import *
 import random
-
+import requests
 import const
 
 import config
@@ -14,57 +14,31 @@ class DBHelper:
             url=config.couchdb_host, admin_party=config.couchdb_admin_party, connect=True)
         self.node_id = config.node_id
 
-        self.process_job_prefer_db = "import_twitter_tweet"
-    
-
-                                                # db_name, job_id, need to slow down
-    def get_process_job(self) -> Optional[Tuple[str, str, bool]]:
-        res = self._get_process_job(self.process_job_prefer_db)
-        if res is not None:
-            return (self.process_job_prefer_db, res[0], res[1])
-        
-        if self.process_job_prefer_db == "import_twitter_tweet":
-            self.process_job_prefer_db = "harvest_twitter_tweet"
-        else:
-            self.process_job_prefer_db = "import_twitter_tweet"
-        
-        res = self._get_process_job(self.process_job_prefer_db)
-        if res is not None:
-            print("======= switch db =======")
-            return (self.process_job_prefer_db, res[0], res[1])
-        
-        # no job
-        return None
-
-
-                                                            # job_id, need to slow down
-    def _get_process_job(self, db_name: str) -> Optional[Tuple[str, bool]]:
-
-        selector = {
-            'process_meta.processed': {
-                '$eq': False
-            },
-            'process_meta.lock_timestamp': {
-                '$lt': int(time.time()) - const.PROCESS_JOB_TIMEOUT
-                }
-            }
-        query = cloudant.query.Query(self.client[db_name], \
-            selector=selector, fields=['_id'])
-        ans = query(limit=const.FETCH_JOB_COUNT)["docs"]
-        if len(ans) == 0:
-            # no more jobs
+                            
+    def get_process_job(self) -> Optional[Tuple[str, str]]:
+        r = requests.get(config.couchdb_host + "/go_backend/message_queue/get_preprocess_job", {"token": config.couchdb_auth_token})
+        if r.status_code == 200:
+            j = r.json()
+            return (j["dbType"], j["jobID"])
+        if r.status_code == 404:
+            # no more job
             return None
+        raise Exception("Unable to get a job", r.status_code, r.text)
 
-        # reduce conflict ratio
-        return (random.choice(ans)["_id"], len(ans) < const.FETCH_JOB_COUNT)
 
 
     def lock_process_job(self, db_name: str, id: str) -> cloudant.document:
         # try to lock this job
         doc = self.client[db_name][id]
+        # ignore local cache
+        doc.fetch()
 
         deadline = int(time.time()) - const.PROCESS_JOB_TIMEOUT
         if doc["process_meta"]["lock_timestamp"] > deadline or doc["process_meta"]["processed"] == True:
+            print("=============")
+            print(doc["_id"])
+            print(doc["process_meta"]["lock_timestamp"])
+            print(doc["process_meta"]["processed"])
             raise Exception("job have been taken.")
 
         doc["process_meta"]["lock_timestamp"] = int(time.time())

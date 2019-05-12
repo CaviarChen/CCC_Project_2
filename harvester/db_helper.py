@@ -5,6 +5,7 @@ from typing import *
 
 import const
 import random
+import requests
 
 import config
 
@@ -53,24 +54,19 @@ class DBHelper:
 
     # find one user that haven't been harvested in X hours
     def get_user_harvest_job(self) -> Optional[str]:
-        selector = {
-            'last_harvest': {
-                '$lt': int(time.time()) - const.USER_HARVEST_INTERVAL
-                }
-            }
-        query = cloudant.query.Query(self.client["harvest_twitter_user"], \
-            selector=selector, fields=['_id'])
-        ans = query(limit=const.FETCH_JOB_COUNT)["docs"]
-        if len(ans) == 0:
-            # no more jobs
+        r = requests.get(config.couchdb_host + "/go_backend/message_queue/get_harvest_user_job", {"token": config.couchdb_auth_token})
+        if r.status_code == 200:
+            j = r.json()
+            return j["jobID"]
+        if r.status_code == 404:
+            # no more job
             return None
-
-        # reduce conflict ratio
-        return random.choice(ans)["_id"]
+        raise Exception("Unable to get a job", r.status_code, r.text)
     
     def lock_user_harvest_job(self, id: str) -> cloudant.document:
         # try to lock this job
         doc = self.client["harvest_twitter_user"][id]
+        doc.fetch()
 
         deadline = int(time.time()) - const.USER_HARVEST_INTERVAL
         if doc["last_harvest"] > deadline:

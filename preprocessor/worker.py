@@ -33,13 +33,8 @@ class Worker:
             print("no job, wait")
             time.sleep(const.NO_JOB_WAIT)
             return
-        
-        if res[2]:
-            print("slow down")
-            time.sleep(const.SLOW_DOWN_WAIT)
 
-        tweet_type = res[0]
-        job_id = res[1]
+        tweet_type, job_id = res
 
         # lock job
         try:

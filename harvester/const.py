@@ -12,6 +12,3 @@ USER_HARVEST_TIMEOUT = 1 * 60 * 60
 USER_NO_JOB_SLEEP_TIME = 5 * 60
 USER_TWITTER_API_BACKOFF = 20 * 60
 
-# too high will increase the cost of getting a job
-# too low will increate the chance of conflict
-FETCH_JOB_COUNT = 4
