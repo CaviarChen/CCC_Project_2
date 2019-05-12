@@ -10,12 +10,6 @@ import AppLayout from './layouts/AppLayout'
 import { TOKEN, DATABASE_URL } from './config.js'
 import * as mel_geo_basic_url from './melbourne_avgpoints.geojson'
 
-var pieData = null;
-var sa2name = null;
-var pointText = null;
-var pointWOI = null;
-var pointName = null;
-
 const radarData = {
   labels: ['Eating', 'Drinking', 'Sleeping', 'Designing', 'Coding', 'Cycling', 'Running'],
   datasets: [
@@ -86,16 +80,21 @@ class Map extends Component {
       advisible: false,
       pdvisible: false,
       map: null,
-      is_loading: true
+      is_loading: true,
+      current_pd_docid: null,
+
+      pieData: null,
+      sa2name: null,
+      current_pd_data: null
     };
   }
 
   loadData = async (map) => {
 
     const reqs = [];
-    reqs.push(Axios.get(DATABASE_URL + 'designDoc/_view/get_surburb_summary?group=true'));
+    reqs.push(Axios.get(DATABASE_URL + 'tweet_data/_design/designDoc/_view/get_surburb_summary?group=true'));
     reqs.push(Axios.get(mel_geo_basic_url));
-    reqs.push(Axios.get(DATABASE_URL + 'jinstan/_view/sample'));
+    reqs.push(Axios.get(DATABASE_URL + 'tweet_data/_design/designDoc/_view/sample_points'));
 
     const res = await Axios.all(reqs);
     let adder = res[0].data
@@ -133,15 +132,13 @@ class Map extends Component {
       geo.features.push({
         "type": "Feature",
         "properties": {
-          "text": data.rows[i].value.text,
-          "words_of_interest": data.rows[i].value.words_of_interest,
-          "name": data.rows[i].value.user.name
+          "id": data.rows[i].id
         },
         "geometry": {
           "type": "Point",
           "coordinates": [
-            data.rows[i].value.geo.longtitude,
-            data.rows[i].value.geo.latitude
+            data.rows[i].value.longtitude,
+            data.rows[i].value.latitude
           ]
         }
       })
@@ -172,29 +169,27 @@ class Map extends Component {
   }
 
   showDrawer = (e) => {
-    sa2name = e.properties.SA2_NAME16
-
-    pieData = {
-      labels: [
-        'UnRelated Tweet',
-        'Related Tweet'
-      ],
-      datasets: [{
-        data: [e.properties.TOTAL_TWEET - e.properties.RELATED_TWEET, e.properties.RELATED_TWEET],
-        backgroundColor: [
-          '#36A2EB',
-          '#FF6384',
-        ],
-        hoverBackgroundColor: [
-          '#36A2EB',
-          '#FF6384',
-        ]
-      }]
-    };
-
     this.setState({
       advisible: true,
-    });
+      sa2name: e.properties.SA2_NAME16,
+      pieData: {
+        labels: [
+          'UnRelated Tweet',
+          'Related Tweet'
+        ],
+        datasets: [{
+          data: [e.properties.TOTAL_TWEET - e.properties.RELATED_TWEET, e.properties.RELATED_TWEET],
+          backgroundColor: [
+            '#36A2EB',
+            '#FF6384',
+          ],
+          hoverBackgroundColor: [
+            '#36A2EB',
+            '#FF6384',
+          ]
+        }]
+      }
+    })
   };
 
   onClose = () => {
@@ -204,18 +199,26 @@ class Map extends Component {
   };
 
   showPdDrawer = (e) => {
-    pointText = e.properties.text
-    pointWOI = e.properties.words_of_interest
-    pointName = e.properties.name
-
     this.setState({
       pdvisible: true,
+      current_pd_docid: e.properties.id
     });
+    this.loadPdData(e.properties.id);
   };
+
+  loadPdData = async (docid) => {
+    const res = await Axios.get(DATABASE_URL + '/tweet_data/' +  docid)
+    if(docid === this.state.current_pd_docid){
+      this.setState({
+        current_pd_data: res.data.data,
+      })
+    }
+  }
 
   onPdClose = () => {
     this.setState({
       pdvisible: false,
+      current_pd_data: null
     });
   };
 
@@ -270,15 +273,6 @@ class Map extends Component {
             0.9, '#512015',
             1, '#000000'
           ],
-          // 'fill-color': [
-          //   "rgb",
-          //   // red is higher when feature.properties.temperature is higher
-          //   ["get", "COLOR_RATIO"],
-          //   // green is always zero
-          //   200,
-          //   // blue is higher when feature.properties.temperature is lower
-          //   ["-", 255, ["get", "COLOR_RATIO"]]
-          // ],
           "fill-opacity": ["case",
             ["boolean", ["feature-state", "hover"], false],
             0.8,
@@ -444,7 +438,7 @@ class Map extends Component {
           ref={el => this.mapContainer = el}
           className="mapbox map" />
         <Drawer
-          title={sa2name}
+          title={this.state.sa2name}
           width="30%"
           placement="right"
           closable={false}
@@ -453,7 +447,7 @@ class Map extends Component {
         >
           <Collapse defaultActiveKey={['1']}>
             <Panel header="This is panel header 1" key="1">
-              <Pie data={pieData} width={100} />
+              <Pie data={this.state.pieData} width={100} />
             </Panel>
             <Panel header="This is panel header 2" key="2">
               <Line data={lineData} width={100} />
@@ -472,19 +466,51 @@ class Map extends Component {
           onClose={this.onPdClose}
           visible={this.state.pdvisible}
         >
+          
+          <PDDrawCard data={this.state.current_pd_data} />
 
-          <Card
-            title={'@' + pointName}
+          {/* <Card
+            title={this.state.current_pd_data?'@' + this.state.current_pd_data.user.name:'loading'}
             style={{ width: '100%' }}
           >
-            <p>{pointText}</p>
-          </Card>
+            <p>{this.state.current_pd_data.text?this.state.current_pd_data.text:'loading'}</p>
+          </Card> */}
 
         </Drawer>
       </AppLayout>
 
     );
   }
+}
+
+
+function PDDrawCard(props) {
+  const data = props.data;
+  if (data == null) {
+    return (<Card
+      title={'loading'}
+      style={{ width: '100%' }}
+    >
+      <p>{'loading'}</p>
+    </Card>);
+  }
+  return (<Card
+    title={'@' + data.user.name}
+    style={{ width: '100%' }}
+    cover={<img alt="tweetimage" src={data.images[0].url} />}
+  >
+    <p>{data.text}</p>
+    <div>
+        {data.words_of_interest.map((tag, index) => {
+          const tagElem = (
+            <Tag key={tag}>
+              {tag}
+            </Tag>
+          );
+          return tagElem;
+        })}
+    </div>
+  </Card>);
 }
 
 export default Map;
