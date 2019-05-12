@@ -17,6 +17,8 @@
     name: "{{ item }}_{{ ansible_hostname }}"
     state: absent
   loop: "{{ docker_images_name }}"
+  tags:
+    - rm
 
 - name: Start harvesters dockers
   docker_container:
