@@ -1,4 +1,5 @@
 ---
+
 - hosts: all
   vars_files:
     - host_vars/comm_config_vars.yaml
@@ -9,6 +10,18 @@
   remote_user: ubuntu
   become: yes
   become_method: sudo
-
   roles:
     - schedule_jobs
+
+- hosts: alfa, bravo
+  vars_files:
+    - host_vars/comm_config_vars.yaml
+    - host_vars/db_config_vars.yaml
+    - host_vars/docker_vars.yaml
+    - host_vars/vault_vars.yaml
+  gather_facts: true
+  remote_user: ubuntu
+  become: yes
+  become_method: sudo
+  roles:
+    - schedule_go_backend

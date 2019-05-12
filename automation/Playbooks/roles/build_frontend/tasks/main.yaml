@@ -1,0 +1,20 @@
+---
+- name: Install Node.js
+  apt:
+    name: ['build-essential', 'nodejs', 'npm']
+    state: latest
+    update_cache: yes
+
+- name: Install npm packages
+  shell: >
+    npm install
+  args:
+    executable: /bin/bash
+    chdir: /home/ubuntu/CCC_Project_2/frontend
+
+- name: Build static site
+  shell: >
+    npm run build
+  args:
+    executable: /bin/bash
+    chdir: /home/ubuntu/CCC_Project_2/frontend

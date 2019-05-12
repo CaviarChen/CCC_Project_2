@@ -1,19 +1,21 @@
 ---
 - name: Pull docker image
   docker_image:
-      name: nginx
-      tag: latest
-
+    name: nginx
+    tag: latest
+  register: nginx_pull_rst
+  
 - name: Write Nginx configuration file
   template:
     src: conf.j2
     dest: /home/ubuntu/nginx.conf
+  register: nginx_conf_rst
 
-- name: Check if the docker is running
-  shell: "docker start nginx"
-  ignore_errors: true
-  no_log: true
-  register: nginx_start
+- name: Remove exisiting Nginx docker
+  docker_container:
+    name: nginx_ccc
+    state: absent
+  when: nginx_pull_rst.changed or nginx_conf_rst.changed
 
 - name: Start the Nginx docker
   shell: >
@@ -23,7 +25,8 @@
     -v /home/ubuntu/nginx.conf:/etc/nginx/conf.d/default.conf
     --name nginx_ccc
     -d nginx:latest
-  when: nginx_start.rc != 0 
+  when: nginx_pull_rst.changed or nginx_conf_rst.changed
 
 - pause:
     seconds: 10
+  when: nginx_pull_rst.changed or nginx_conf_rst.changed
