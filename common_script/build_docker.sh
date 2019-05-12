@@ -15,7 +15,12 @@ function pre {
     docker push registry.gitlab.com/cepheidfov/ccc_project_2/preprocessor:latest
 }
 
-printf "1) harvester\n2) importer\n3) pre-processor\ndefault) ALL\n"
+function go_backend {
+    docker build -t registry.gitlab.com/cepheidfov/ccc_project_2/go_backend:latest ../go_backend
+    docker push registry.gitlab.com/cepheidfov/ccc_project_2/go_backend:latest
+}
+
+printf "1) harvester\n2) importer\n3) pre-processor\n4) go-backend\ndefault) ALL\n"
 read inpt
 
 case $inpt in 
@@ -27,6 +32,9 @@ case $inpt in
         ;;
     "3")
         pre
+        ;;
+    "4")
+        go_backend
         ;;
     "")
         harvester
