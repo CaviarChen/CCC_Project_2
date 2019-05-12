@@ -11,32 +11,6 @@ import { TOKEN, DATABASE_URL } from './config.js'
 import * as mel_geo_basic_url from './melbourne_avgpoints.geojson'
 import * as mel_census_data from './melb_census.geojson'
 
-const radarData = {
-  labels: ['Eating', 'Drinking', 'Sleeping', 'Designing', 'Coding', 'Cycling', 'Running'],
-  datasets: [
-    {
-      label: 'My First dataset',
-      backgroundColor: 'rgba(179,181,198,0.2)',
-      borderColor: 'rgba(179,181,198,1)',
-      pointBackgroundColor: 'rgba(179,181,198,1)',
-      pointBorderColor: '#fff',
-      pointHoverBackgroundColor: '#fff',
-      pointHoverBorderColor: 'rgba(179,181,198,1)',
-      data: [65, 59, 90, 81, 56, 55, 40]
-    },
-    {
-      label: 'My Second dataset',
-      backgroundColor: 'rgba(255,99,132,0.2)',
-      borderColor: 'rgba(255,99,132,1)',
-      pointBackgroundColor: 'rgba(255,99,132,1)',
-      pointBorderColor: '#fff',
-      pointHoverBackgroundColor: '#fff',
-      pointHoverBorderColor: 'rgba(255,99,132,1)',
-      data: [28, 48, 40, 19, 96, 27, 100]
-    }
-  ]
-};
-
 const Panel = Collapse.Panel;
 
 mapboxgl.accessToken = TOKEN;
@@ -68,7 +42,7 @@ class Map extends Component {
     const reqs = [];
     reqs.push(Axios.get(DATABASE_URL + 'tweet_data/_design/designDoc/_view/get_surburb_summary?group=true'));
     reqs.push(Axios.get(mel_geo_basic_url));
-    reqs.push(Axios.get(DATABASE_URL + 'tweet_data/_design/jinstan/_view/sample'));
+    reqs.push(Axios.get(DATABASE_URL + 'tweet_data/_design/designDoc/_view/sample_points'));
     reqs.push(Axios.get(mel_census_data));
 
     const res = await Axios.all(reqs);
@@ -443,7 +417,7 @@ class Map extends Component {
           className="mapbox map" />
         <Drawer
           title={this.state.sa2name}
-          width="30%"
+          width="35%"
           placement="right"
           closable={false}
           onClose={this.onClose}
@@ -462,15 +436,12 @@ class Map extends Component {
                 width={100} 
                 height={120} />
             </Panel>
-            <Panel header="This is panel header 3" key="3">
-              <Radar data={radarData} width={100} />
-            </Panel>
           </Collapse>
         </Drawer>
 
         <Drawer
           title="Tweet Content"
-          width="30%"
+          width="35%"
           placement="right"
           closable={false}
           onClose={this.onPdClose}
