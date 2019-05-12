@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import mapboxgl from 'mapbox-gl'
 import { Drawer, Collapse, Spin, Card, Tag } from 'antd'
-import { Radar, Pie, Line } from 'react-chartjs-2'
+import { Bar, Line, Pie, Radar } from 'react-chartjs-2'
 import Axios from 'axios';
 import 'mapbox-gl/dist/mapbox-gl.css'
 
@@ -9,8 +9,10 @@ import AppLayout from './layouts/AppLayout'
 
 import { TOKEN, DATABASE_URL } from './config.js'
 import * as mel_geo_basic_url from './melbourne_avgpoints.geojson'
+import * as mel_census_data from './melb_census.geojson'
 
 var pieData = null;
+var barData = null;
 var sa2name = null;
 var pointText = null;
 var pointWOI = null;
@@ -42,34 +44,6 @@ const radarData = {
   ]
 };
 
-const lineData = {
-  labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
-  datasets: [
-    {
-      label: 'My First dataset',
-      fill: false,
-      lineTension: 0.1,
-      backgroundColor: 'rgba(75,192,192,0.4)',
-      borderColor: 'rgba(75,192,192,1)',
-      borderCapStyle: 'butt',
-      borderDash: [],
-      borderDashOffset: 0.0,
-      borderJoinStyle: 'miter',
-      pointBorderColor: 'rgba(75,192,192,1)',
-      pointBackgroundColor: '#fff',
-      pointBorderWidth: 1,
-      pointHoverRadius: 5,
-      pointHoverBackgroundColor: 'rgba(75,192,192,1)',
-      pointHoverBorderColor: 'rgba(220,220,220,1)',
-      pointHoverBorderWidth: 2,
-      pointRadius: 1,
-      pointHitRadius: 10,
-      data: [65, 59, 80, 81, 56, 55, 40]
-    }
-  ]
-};
-
-
 const Panel = Collapse.Panel;
 
 mapboxgl.accessToken = TOKEN;
@@ -93,16 +67,18 @@ class Map extends Component {
   loadData = async (map) => {
 
     const reqs = [];
-    reqs.push(Axios.get(DATABASE_URL + 'designDoc/_view/get_surburb_summary?group=true'));
+    reqs.push(Axios.get(DATABASE_URL + 'tweet_data/_design/designDoc/_view/get_surburb_summary?group=true'));
     reqs.push(Axios.get(mel_geo_basic_url));
-    reqs.push(Axios.get(DATABASE_URL + 'jinstan/_view/sample'));
+    reqs.push(Axios.get(DATABASE_URL + 'tweet_data/_design/jinstan/_view/sample'));
+    reqs.push(Axios.get(mel_census_data));
 
     const res = await Axios.all(reqs);
     let adder = res[0].data
     let mel_geo_basic = res[1].data
     let mel_geo_point = res[2].data
+    let mel_census = res[3].data
 
-    let areaData = this.appendProperties(mel_geo_basic, adder)
+    let areaData = this.appendProperties(mel_geo_basic, adder, mel_census)
     let pointData = this.makeGeoPoints(mel_geo_point)
     this.setState({
       is_loading: false,
@@ -112,7 +88,7 @@ class Map extends Component {
     map.getSource('points').setData(pointData);
   }
 
-  appendProperties = (basic, adder) => {
+  appendProperties = (basic, adder, mel_census) => {
 
     for (let i = 0; i < adder.rows.length; i++) {
       let key = adder.rows[i].key
@@ -120,8 +96,13 @@ class Map extends Component {
         basic.features[key - 1].properties['TOTAL_TWEET'] = adder.rows[i].value[1]
         basic.features[key - 1].properties['RELATED_TWEET'] = adder.rows[i].value[0]
         basic.features[key - 1].properties['RELATED_TWEET_RATIO'] = adder.rows[i].value[0] / adder.rows[i].value[1] * 1.8;
+        basic.features[key - 1].properties['FEMALE_NEVER_MARRIED'] = mel_census['features'][i]['properties']['f_20_24_yr_never_married']
+        basic.features[key - 1].properties['FEMALE_TOTAL'] = mel_census['features'][i]['properties']['f_20_24_yr_tot']
+        basic.features[key - 1].properties['PERSON_NEVER_MARRIED'] = mel_census['features'][i]['properties']['p_20_24_yr_never_married']
+        basic.features[key - 1].properties['PERSON_TOTAL'] = mel_census['features'][i]['properties']['p_20_24_yr_tot']
       }
     }
+    console.log(basic)
     return basic
   }
 
@@ -191,6 +172,29 @@ class Map extends Component {
         ]
       }]
     };
+
+    barData = {
+      labels: [
+        'Female never married',
+        'Female total',
+        'Person never married',
+        'Person total'
+      ],
+      datasets: [{
+        label: 'Number',
+        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+        borderColor: 'rgba(255, 99, 132, 1)',
+        borderWidth: 1,
+        hoverBackgroundColor: 'rgba(255, 99, 132, 0.4)',
+        hoverBorderColor: 'rgba(255, 99, 132, 1)',
+        data: [
+          e.properties.FEMALE_NEVER_MARRIED, 
+          e.properties.FEMALE_TOTAL, 
+          e.properties.PERSON_NEVER_MARRIED, 
+          e.properties.PERSON_TOTAL
+        ]
+      }]
+    }
 
     this.setState({
       advisible: true,
@@ -451,12 +455,18 @@ class Map extends Component {
           onClose={this.onClose}
           visible={this.state.advisible}
         >
-          <Collapse defaultActiveKey={['1']}>
-            <Panel header="This is panel header 1" key="1">
-              <Pie data={pieData} width={100} />
+          <Collapse defaultActiveKey={['1', '2']}>
+            <Panel header="Related Tweet Pie Chart" key="1">
+              <Pie 
+                data={pieData} 
+                width={100} 
+                height={120} />
             </Panel>
-            <Panel header="This is panel header 2" key="2">
-              <Line data={lineData} width={100} />
+            <Panel header="Relationship Bar Chart" key="2">
+              <Bar 
+                data={barData} 
+                width={100} 
+                height={120} />
             </Panel>
             <Panel header="This is panel header 3" key="3">
               <Radar data={radarData} width={100} />
