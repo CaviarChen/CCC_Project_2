@@ -1,0 +1,11 @@
+---
+- hosts: localhost
+  vars_files:
+    - host_vars/db_config_vars.yaml
+    - host_vars/docker_vars.yaml
+    - host_vars/vault_vars.yaml
+  gather_facts: true
+  become: yes
+  become_method: sudo
+  roles:
+    - build_dockers
