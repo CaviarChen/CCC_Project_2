@@ -1,3 +1,5 @@
+import pytz
+from datetime import timezone
 from datetime import datetime
 from db_helper import DBHelper
 import cloudant
@@ -7,6 +9,7 @@ import surburbHandler
 import textAnalysis
 import traceback
 import random
+
 
 class Worker:
     def __init__(self, worker_id: int) -> None:
@@ -90,6 +93,13 @@ class Worker:
         data["hashtags"] = hashtags
         data["text"] = text
         data["created_at"] = time
+
+        melb_time = datetime.strptime(time, '%a %b %d %H:%M:%S %z %Y')\
+            .replace(tzinfo=timezone.utc).astimezone(pytz.timezone('Australia/Melbourne'))
+
+        data["created_at_melb_time"] = \
+            [melb_time.year, melb_time.month, melb_time.day, melb_time.hour, melb_time.minute, melb_time.second]
+
         data["user"] = {"id": user_id,
                         "name": user_name}
         keyWords = textAnalysis.glutonnyWords(text, hashtags)

@@ -1,5 +1,5 @@
-# 2 hour
-PROCESS_JOB_TIMEOUT = 2 * 60 * 60
+# 6 hour
+PROCESS_JOB_TIMEOUT = 6 * 60 * 60
 
 NO_JOB_WAIT = 20 * 60
 

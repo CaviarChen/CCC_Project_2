@@ -63,7 +63,7 @@ class DBHelper:
             'data': data,
             'process_meta': process_meta
         }
-        self.client["tweet_data"].create_document(result_doc, True)
+        self.client["tweet_data"].create_document(result_doc, False)
 
     def get_tweet_image_with_yolo(self, url: str) -> Optional[Any]:
         if url in self.client["tweet_image_with_yolo"]:

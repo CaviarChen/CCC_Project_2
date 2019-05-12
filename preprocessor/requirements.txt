@@ -8,6 +8,7 @@ isort==4.3.18
 lazy-object-proxy==1.4.0
 mccabe==0.6.1
 pylint==2.3.1
+pytz==2019.1
 requests==2.21.0
 Shapely==1.6.4.post2
 six==1.12.0

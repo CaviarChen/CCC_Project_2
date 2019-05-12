@@ -17,8 +17,8 @@ const (
 	importJobTimeout = 8 * 60 * 60
 	// 10 hour
 	userHarvestJobInterval = 10 * 60 * 60
-	// 2 hour
-	preprocessJobTimeout = 2 * 60 * 60
+	// 6 hour
+	preprocessJobTimeout = 6 * 60 * 60
 
 	// 20 mins
 	noJobWait = 20 * 60
