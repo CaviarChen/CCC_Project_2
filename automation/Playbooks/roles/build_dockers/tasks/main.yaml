@@ -1,4 +1,9 @@
 ---
+- name: Install docker-py
+  pip:
+    name: docker
+    state: latest
+
 - name: Login to private registry with write access
   docker_login:
     registry: "{{ docker_private_registry }}"
