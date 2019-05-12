@@ -1,8 +1,8 @@
 ---
 - name: Start Golang backend helper docker
   docker_container:
-    name: preprocessor_{{ ansible_hostname }}
-    image: registry.gitlab.com/{{ docker_private_user }}/ccc_project_2/preprocessor:latest
+    name: go_backend_{{ ansible_hostname }}
+    image: registry.gitlab.com/{{ docker_private_user }}/ccc_project_2/go_backend:latest
     restart_policy: always
     env:
         HTTP_PROXY: "http://wwwproxy.unimelb.edu.au:8000"
