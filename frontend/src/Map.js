@@ -1,18 +1,20 @@
 import React, { Component } from 'react'
 import mapboxgl from 'mapbox-gl'
-import { Drawer, Collapse, Spin } from 'antd'
+import { Drawer, Collapse, Spin, Card } from 'antd'
 import { Radar, Pie, Line } from 'react-chartjs-2'
 import Axios from 'axios';
 import 'mapbox-gl/dist/mapbox-gl.css'
 
 import AppLayout from './layouts/AppLayout'
 
-import {TOKEN, DATABASE_URL} from './config.js'
+import { TOKEN, AREA_URL, POINT_URL } from './config.js'
 import * as mel_geo_basic_url from './melbourne_avgpoints.geojson'
-import * as geoPoint from './testPoints.geojson'
 
-
+var pieData = null;
 var sa2name = null;
+var pointText = null;
+var pointWOI = null;
+var pointName = null;
 
 const radarData = {
   labels: ['Eating', 'Drinking', 'Sleeping', 'Designing', 'Coding', 'Cycling', 'Running'],
@@ -68,8 +70,6 @@ const lineData = {
 };
 
 
-var pieData = null
-
 const Panel = Collapse.Panel;
 
 mapboxgl.accessToken = TOKEN;
@@ -93,39 +93,67 @@ class Map extends Component {
   loadData = async (map) => {
 
     const reqs = [];
-    reqs.push(Axios.get(DATABASE_URL));
+    reqs.push(Axios.get(AREA_URL));
     reqs.push(Axios.get(mel_geo_basic_url));
+    reqs.push(Axios.get(POINT_URL));
 
     const res = await Axios.all(reqs);
     let adder = res[0].data
     let mel_geo_basic = res[1].data
+    let mel_geo_point = res[2].data
 
-    let newData = this.appendProperties(mel_geo_basic, adder)
+    let areaData = this.appendProperties(mel_geo_basic, adder)
+    let pointData = this.makeGeoPoints(mel_geo_point)
     this.setState({
       is_loading: false,
     });
 
-    map.getSource('suburbs').setData(newData);
+    map.getSource('suburbs').setData(areaData);
+    map.getSource('points').setData(pointData);
   }
 
   appendProperties = (basic, adder) => {
 
-    for (let i = 0; i < adder.rows.length; i++){
+    for (let i = 0; i < adder.rows.length; i++) {
       let key = adder.rows[i].key
-      if(key > 0 && key < 310) {
-        basic.features[key-1].properties['TOTAL_TWEET'] = adder.rows[i].value[1]
-        basic.features[key-1].properties['RELATED_TWEET'] = adder.rows[i].value[0]
-        basic.features[key-1].properties['RELATED_TWEET_RATIO'] = adder.rows[i].value[0] / adder.rows[i].value[1] * 1.8;
+      if (key > 0 && key < 310) {
+        basic.features[key - 1].properties['TOTAL_TWEET'] = adder.rows[i].value[1]
+        basic.features[key - 1].properties['RELATED_TWEET'] = adder.rows[i].value[0]
+        basic.features[key - 1].properties['RELATED_TWEET_RATIO'] = adder.rows[i].value[0] / adder.rows[i].value[1] * 1.8;
       }
     }
     return basic
+  }
+
+  makeGeoPoints = (data) => {
+    var geo = {}
+    geo['type'] = "FeatureCollection";
+    geo['features'] = []
+    for (let i = 0; i < data.rows.length; i++) {
+      geo.features.push({
+        "type": "Feature",
+        "properties": {
+          "text": data.rows[i].value.text,
+          "words_of_interest": data.rows[i].value.words_of_interest,
+          "name": data.rows[i].value.user.name
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            data.rows[i].value.geo.longtitude,
+            data.rows[i].value.geo.latitude
+          ]
+        }
+      })
+    }
+    return geo
   }
 
   onAreaClick = (e) => {
     this.showDrawer(e)
     this.state.map.flyTo({
       center: [e.properties.AVG_LNG, e.properties.AVG_LAT],
-      zoom: 12.5,
+      zoom: 12,
       bearing: 0,
       speed: 0.4, // make the flying slow
       curve: 2.2, // change the speed at which it zooms out
@@ -152,7 +180,7 @@ class Map extends Component {
         'Related Tweet'
       ],
       datasets: [{
-        data: [e.properties.TOTAL_TWEET-e.properties.RELATED_TWEET, e.properties.RELATED_TWEET],
+        data: [e.properties.TOTAL_TWEET - e.properties.RELATED_TWEET, e.properties.RELATED_TWEET],
         backgroundColor: [
           '#36A2EB',
           '#FF6384',
@@ -176,6 +204,10 @@ class Map extends Component {
   };
 
   showPdDrawer = (e) => {
+    pointText = e.properties.text
+    pointWOI = e.properties.words_of_interest
+    pointName = e.properties.name
+
     this.setState({
       pdvisible: true,
     });
@@ -210,19 +242,19 @@ class Map extends Component {
         'data': null,
       })
 
-      this.loadData(map);
-
-      map.addSource('testPoints', {
+      map.addSource('points', {
         'type': 'geojson',
-        'data': geoPoint
+        'data': null
       })
+
+      this.loadData(map);
 
       map.addLayer({
         'id': 'suburb-fills',
         'type': 'fill',
         'source': 'suburbs',
         "paint": {
-          'fill-color':[
+          'fill-color': [
             'interpolate',
             ['linear'],
             ['get', 'RELATED_TWEET_RATIO'],
@@ -236,8 +268,8 @@ class Map extends Component {
             0.7, '#8B4225',
             0.8, '#723122',
             0.9, '#512015',
-            1,   '#000000'
-            ],
+            1, '#000000'
+          ],
           // 'fill-color': [
           //   "rgb",
           //   // red is higher when feature.properties.temperature is higher
@@ -246,7 +278,7 @@ class Map extends Component {
           //   200,
           //   // blue is higher when feature.properties.temperature is lower
           //   ["-", 255, ["get", "COLOR_RATIO"]]
-        // ],
+          // ],
           "fill-opacity": ["case",
             ["boolean", ["feature-state", "hover"], false],
             0.8,
@@ -269,7 +301,7 @@ class Map extends Component {
       map.addLayer({
         id: 'test-heat',
         type: 'heatmap',
-        source: 'testPoints',
+        source: 'points',
         maxzoom: 15,
         paint: {
           // increase weight as diameter breast height increases
@@ -315,7 +347,7 @@ class Map extends Component {
       map.addLayer({
         id: 'test-point',
         type: 'circle',
-        source: 'testPoints',
+        source: 'points',
         minzoom: 14,
         paint: {
           // increase the radius of the circle as the zoom level and dbh value increases
@@ -338,7 +370,7 @@ class Map extends Component {
 
     // map.on('click', 'test-point', this.onPointClick.bind(this));
 
-    map.on('click', function(e) {
+    map.on('click', function (e) {
       let f = map.queryRenderedFeatures(e.point, { layers: ['test-point'] })
       if (f.length) {
         this.onPointClick(f[0])
@@ -348,15 +380,15 @@ class Map extends Component {
           this.onAreaClick(f[0])
         }
       }
-      
+
     }.bind(this));
 
-    map.on('mouseenter', 'test-point', function(e) {
+    map.on('mouseenter', 'test-point', function (e) {
       // Change the cursor style as a UI indicator.
       map.getCanvas().style.cursor = 'pointer';
     });
 
-    map.on('mouseleave', 'test-point', function() {
+    map.on('mouseleave', 'test-point', function () {
       map.getCanvas().style.cursor = '';
     });
 
@@ -368,7 +400,7 @@ class Map extends Component {
             id: hoveredStateId
           }, {
               hover: false
-          });
+            });
         }
         hoveredStateId = e.features[0].id;
         map.setFeatureState({
@@ -376,7 +408,7 @@ class Map extends Component {
           id: hoveredStateId
         }, {
             hover: true
-        });
+          });
       }
     });
 
@@ -387,7 +419,7 @@ class Map extends Component {
           id: hoveredStateId
         }, {
             hover: false
-        });
+          });
       }
     });
   }
@@ -401,17 +433,16 @@ class Map extends Component {
 
     return (
       <AppLayout>
-        <Spin 
-          className="spin" 
-          spinning={this.state.is_loading} 
-          size="large" 
-          tip="Loading..." 
+        <Spin
+          className="spin"
+          spinning={this.state.is_loading}
+          size="large"
+          tip="Loading..."
           style={{ position: "absolute", margin: "auto", top: "50%", left: "50%", zIndex: "1000" }} />
         <div
           style={style}
           ref={el => this.mapContainer = el}
           className="mapbox map" />
-
         <Drawer
           title={sa2name}
           width="30%"
@@ -425,7 +456,7 @@ class Map extends Component {
               <Pie data={pieData} width={100} />
             </Panel>
             <Panel header="This is panel header 2" key="2">
-              <Line data={lineData} width={100}/>
+              <Line data={lineData} width={100} />
             </Panel>
             <Panel header="This is panel header 3" key="3">
               <Radar data={radarData} width={100} />
@@ -434,15 +465,25 @@ class Map extends Component {
         </Drawer>
 
         <Drawer
-          title='balabalabala'
+          title={'@' + pointName}
           width="30%"
           placement="right"
           closable={false}
           onClose={this.onPdClose}
           visible={this.state.pdvisible}
         >
+
+          <Card
+            title="Tweet Content"
+            style={{ width: '100%' }}
+          >
+            <p>{pointText}</p>
+            <p>{pointWOI}</p>
+          </Card>
+
         </Drawer>
       </AppLayout>
+
     );
   }
 }
