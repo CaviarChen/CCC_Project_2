@@ -7,7 +7,7 @@ upstream couchdb {
 
 upstream backgo {
     {% if 'alfa' in groups['all'] %}
-        server {{ hostvars['alfa']['ansible_host'] }}:8888 fail_timeout=60s max_fails = 1;
+        server {{ hostvars['alfa']['ansible_host'] }}:8888 fail_timeout=60s;
     {% endif %}
     {% if 'bravo' in groups['all'] %}
         server {{ hostvars['bravo']['ansible_host'] }}:8888 backup;
@@ -50,7 +50,7 @@ server {
 
     location /go_backend {
         rewrite /go_backend/(.*) /$1 break;
-        proxy_pass http://backgo
+        proxy_pass http://backgo;
     }
 }
 
