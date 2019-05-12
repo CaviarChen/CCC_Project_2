@@ -12,7 +12,7 @@ func Init() {
 	controllers.Init()
 
 	r := setupRouter()
-	err := r.Run("127.0.0.1:8888")
+	err := r.Run("0.0.0.0:8888")
 	if err != nil {
 		log.Fatal(err)
 	}
