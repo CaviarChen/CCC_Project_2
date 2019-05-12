@@ -1,0 +1,7 @@
+---
+- name: Copy front-end source code
+  copy:
+    src: /home/ubuntu/CCC_Project_2/frontend/build
+    dest: /home/ubuntu/build
+    directory_mode: yes
+    mode: '755'
