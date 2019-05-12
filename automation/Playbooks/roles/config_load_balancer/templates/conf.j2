@@ -1,15 +1,24 @@
-upstream ccc {
+upstream couchdb {
     ip_hash;
     {% for host in groups['all']  %}
         server {{ hostvars[host]['ansible_host'] }}:5984;
     {% endfor %}
 }
 
+upstream backgo {
+    {% if 'alfa' in groups['all'] %}}
+        sever {{ hostvars['alfa']['asnible_host'] }}:8888 fail_timeout=60s max_fails = 1;
+    {% endif %}}
+    {% if 'bravo' in groups['all'] %}}
+        sever {{ hostvars['bravo']['asnible_host'] }}:8888 backup;
+    {% endif %}}
+}
+
 server {
     listen 8080;
 
     location / {
-        proxy_pass http://ccc;
+        proxy_pass http://couchdb;
         proxy_redirect off;
         proxy_buffering off;
         proxy_set_header Host $host;
@@ -37,6 +46,11 @@ server {
            add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
            add_header 'Access-Control-Allow-Headers' 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type';
         }
+    }
+
+    location /go_backend {
+        rewrite /go_backend/(.*) /$1 break;
+        proxy_pass http://backgo
     }
 }
 
