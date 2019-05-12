@@ -1,13 +1,13 @@
 import React, { Component } from 'react'
 import mapboxgl from 'mapbox-gl'
 import { Drawer, Collapse, Spin } from 'antd'
-import { Radar, Pie } from 'react-chartjs-2'
+import { Radar, Pie, Line } from 'react-chartjs-2'
 import Axios from 'axios';
 import 'mapbox-gl/dist/mapbox-gl.css'
 
 import AppLayout from './layouts/AppLayout'
 
-import TOKEN from './config.js'
+import {TOKEN, DATABASE_URL} from './config.js'
 import * as mel_geo_basic_url from './melbourne_avgpoints.geojson'
 import * as geoPoint from './testPoints.geojson'
 
@@ -40,6 +40,34 @@ const radarData = {
   ]
 };
 
+const lineData = {
+  labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+  datasets: [
+    {
+      label: 'My First dataset',
+      fill: false,
+      lineTension: 0.1,
+      backgroundColor: 'rgba(75,192,192,0.4)',
+      borderColor: 'rgba(75,192,192,1)',
+      borderCapStyle: 'butt',
+      borderDash: [],
+      borderDashOffset: 0.0,
+      borderJoinStyle: 'miter',
+      pointBorderColor: 'rgba(75,192,192,1)',
+      pointBackgroundColor: '#fff',
+      pointBorderWidth: 1,
+      pointHoverRadius: 5,
+      pointHoverBackgroundColor: 'rgba(75,192,192,1)',
+      pointHoverBorderColor: 'rgba(220,220,220,1)',
+      pointHoverBorderWidth: 2,
+      pointRadius: 1,
+      pointHitRadius: 10,
+      data: [65, 59, 80, 81, 56, 55, 40]
+    }
+  ]
+};
+
+
 var pieData = null
 
 const Panel = Collapse.Panel;
@@ -65,7 +93,7 @@ class Map extends Component {
   loadData = async (map) => {
 
     const reqs = [];
-    reqs.push(Axios.get("http://www.ccc.8bits.io:8080/tweet_data/_design/designDoc/_view/get_surburb_summary?group=true"));
+    reqs.push(Axios.get(DATABASE_URL));
     reqs.push(Axios.get(mel_geo_basic_url));
 
     const res = await Axios.all(reqs);
@@ -81,7 +109,6 @@ class Map extends Component {
   }
 
   appendProperties = (basic, adder) => {
-    let minv = null, maxv = null;
 
     for (let i = 0; i < adder.rows.length; i++){
       let key = adder.rows[i].key
@@ -89,12 +116,6 @@ class Map extends Component {
         basic.features[key-1].properties['TOTAL_TWEET'] = adder.rows[i].value[1]
         basic.features[key-1].properties['RELATED_TWEET'] = adder.rows[i].value[0]
         basic.features[key-1].properties['RELATED_TWEET_RATIO'] = adder.rows[i].value[0] / adder.rows[i].value[1] * 1.8;
-        
-        if (minv == null || minv > basic.features[key-1].properties['RELATED_TWEET_RATIO'])
-          minv = basic.features[key-1].properties['RELATED_TWEET_RATIO']
-
-        if (maxv == null || maxv < basic.features[key-1].properties['RELATED_TWEET_RATIO'])
-          maxv = basic.features[key-1].properties['RELATED_TWEET_RATIO']
       }
     }
     return basic
@@ -127,11 +148,11 @@ class Map extends Component {
 
     pieData = {
       labels: [
-        'Related Tweet',
-        'Unrelated Tweet'
+        'UnRelated Tweet',
+        'Related Tweet'
       ],
       datasets: [{
-        data: [e.properties.RELATED_TWEET, e.properties.TOTAL_TWEET-e.properties.RELATED_TWEET],
+        data: [e.properties.TOTAL_TWEET-e.properties.RELATED_TWEET, e.properties.RELATED_TWEET],
         backgroundColor: [
           '#36A2EB',
           '#FF6384',
@@ -399,14 +420,15 @@ class Map extends Component {
           onClose={this.onClose}
           visible={this.state.advisible}
         >
-          <Collapse defaultActiveKey={['1', '2']}>
+          <Collapse defaultActiveKey={['1']}>
             <Panel header="This is panel header 1" key="1">
-              <Radar data={radarData} width={100} />
-            </Panel>
-            <Panel header="This is panel header 2" key="2">
               <Pie data={pieData} width={100} />
             </Panel>
+            <Panel header="This is panel header 2" key="2">
+              <Line data={lineData} width={100}/>
+            </Panel>
             <Panel header="This is panel header 3" key="3">
+              <Radar data={radarData} width={100} />
             </Panel>
           </Collapse>
         </Drawer>
