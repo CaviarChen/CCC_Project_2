@@ -62,15 +62,15 @@ func fetchJobsToChannel(dbname string, queryString string, channel chan string, 
 		}
 		log.Printf("fetch a betch from db: %s, got: %d \n", dbname, len(resList))
 
-		if len(resList) == 0 {
-			log.Print(dbname + " no job wait\n")
-			time.Sleep(noJobWait * 1000 * time.Millisecond)
-		}
-
 		// adding to channel
 		// blocking if too many
 		for _, res := range resList {
 			channel <- res["_id"].(string)
+		}
+
+		if len(resList) < loadSize {
+			log.Print(dbname + " no job wait\n")
+			time.Sleep(noJobWait * 1000 * time.Millisecond)
 		}
 
 	}
