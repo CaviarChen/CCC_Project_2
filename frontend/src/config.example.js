@@ -1,4 +1,6 @@
 // Input your token here
-const TOKEN = '';
+const TOKEN = 
+const AREA_URL = 
+const POINT_URL = 
 
-export default TOKEN;
+export {TOKEN, AREA_URL, POINT_URL};
