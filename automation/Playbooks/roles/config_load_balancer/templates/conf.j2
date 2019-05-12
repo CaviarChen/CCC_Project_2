@@ -7,10 +7,10 @@ upstream couchdb {
 
 upstream backgo {
     {% if 'alfa' in groups['all'] %}
-        sever {{ hostvars['alfa']['ansible_host'] }}:8888 fail_timeout=60s max_fails = 1;
+        server {{ hostvars['alfa']['ansible_host'] }}:8888 fail_timeout=60s max_fails = 1;
     {% endif %}
     {% if 'bravo' in groups['all'] %}
-        sever {{ hostvars['bravo']['ansible_host'] }}:8888 backup;
+        server {{ hostvars['bravo']['ansible_host'] }}:8888 backup;
     {% endif %}
 }
 
