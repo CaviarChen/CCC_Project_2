@@ -1,7 +1,7 @@
 ---
 - name: Install Node.js
   apt:
-    name: ['build-essential', 'nodejs', 'npm']
+    name: ['build-essential', 'nodejs']
     state: latest
     update_cache: yes
 

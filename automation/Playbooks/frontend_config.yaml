@@ -22,4 +22,4 @@
   become_method: sudo
   roles:
     - config_frontend
-    - config_load_balancer
+    - config_nginx

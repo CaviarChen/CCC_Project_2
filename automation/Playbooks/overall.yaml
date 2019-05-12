@@ -40,7 +40,7 @@
   become_method: sudo
 
   roles:
-    - config_load_balancer
+    - config_nginx
 
 - hosts: localhost
   vars_files:

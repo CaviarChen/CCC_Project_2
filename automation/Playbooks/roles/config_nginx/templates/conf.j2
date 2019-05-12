@@ -56,7 +56,10 @@ server {
 
 server {
     listen 80;
-
+    root /var/www/ccc_site
+    index index.html;
+  
     location / {
+      try_files $uri /index.html =404;
     }
 }
