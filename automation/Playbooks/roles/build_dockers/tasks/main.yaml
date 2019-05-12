@@ -14,7 +14,6 @@
 - name: Build and push all dockers
   docker_image:
     path: /home/ubuntu/CCC_Project_2/{{ item }}
-    name: "{{ docker_private_registry }}/{{ docker_private_user }}/{{ item }}"
-    tag: latest
+    name: "{{ docker_private_registry }}/{{ docker_private_user }}/ccc_project_2/{{ item }}:latest"
     push: yes
   loop: "{{ docker_images_name }}"
