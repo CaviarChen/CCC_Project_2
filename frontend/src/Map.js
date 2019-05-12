@@ -1,13 +1,13 @@
 import React, { Component } from 'react'
 import mapboxgl from 'mapbox-gl'
-import { Drawer, Collapse, Spin, Card } from 'antd'
+import { Drawer, Collapse, Spin, Card, Tag } from 'antd'
 import { Radar, Pie, Line } from 'react-chartjs-2'
 import Axios from 'axios';
 import 'mapbox-gl/dist/mapbox-gl.css'
 
 import AppLayout from './layouts/AppLayout'
 
-import { TOKEN, AREA_URL, POINT_URL } from './config.js'
+import { TOKEN, DATABASE_URL } from './config.js'
 import * as mel_geo_basic_url from './melbourne_avgpoints.geojson'
 
 var pieData = null;
@@ -93,9 +93,9 @@ class Map extends Component {
   loadData = async (map) => {
 
     const reqs = [];
-    reqs.push(Axios.get(AREA_URL));
+    reqs.push(Axios.get(DATABASE_URL + 'designDoc/_view/get_surburb_summary?group=true'));
     reqs.push(Axios.get(mel_geo_basic_url));
-    reqs.push(Axios.get(POINT_URL));
+    reqs.push(Axios.get(DATABASE_URL + 'jinstan/_view/sample'));
 
     const res = await Axios.all(reqs);
     let adder = res[0].data
@@ -465,7 +465,7 @@ class Map extends Component {
         </Drawer>
 
         <Drawer
-          title={'@' + pointName}
+          title="Tweet Content"
           width="30%"
           placement="right"
           closable={false}
@@ -474,11 +474,10 @@ class Map extends Component {
         >
 
           <Card
-            title="Tweet Content"
+            title={'@' + pointName}
             style={{ width: '100%' }}
           >
             <p>{pointText}</p>
-            <p>{pointWOI}</p>
           </Card>
 
         </Drawer>
