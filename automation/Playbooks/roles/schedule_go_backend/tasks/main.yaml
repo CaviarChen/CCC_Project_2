@@ -1,0 +1,18 @@
+---
+- name: Start Golang backend helper docker
+  docker_container:
+    name: preprocessor_{{ ansible_hostname }}
+    image: registry.gitlab.com/{{ docker_private_user }}/ccc_project_2/preprocessor:latest
+    restart_policy: always
+    env:
+        HTTP_PROXY: "http://wwwproxy.unimelb.edu.au:8000"
+        HTTPS_PROXY: "http://wwwproxy.unimelb.edu.au:8000"
+        FTP_PROXY: "http://wwwproxy.unimelb.edu.au:8000"
+        NO_PROXY: "localhost, 127.0.0.1, ccc.8bits.io"
+        H_NODE_ID: "{{ ansible_hostname }}"
+        H_DB_HOST: "{{ docker_DB_HOST }}"
+        H_DB_USER: "{{ couchdb_user }}"
+        H_DB_TOKEN: "{{ couchdb_passwd }}"
+        H_DB_ADMIN_PARTY: "false"
+        H_GEO_LIMIT: "144.3336,145.8784,-38.5030,-37.1751"
+    state: started
