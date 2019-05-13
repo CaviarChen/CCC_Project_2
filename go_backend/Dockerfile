@@ -11,4 +11,5 @@ FROM alpine:latest
 RUN apk --no-cache add ca-certificates
 WORKDIR /app/
 COPY --from=builder /src/go_backend .
+COPY --from=builder /src/DejaVuSans.ttf .
 CMD ["./go_backend"]

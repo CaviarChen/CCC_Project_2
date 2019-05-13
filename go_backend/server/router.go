@@ -15,6 +15,8 @@ func setupRouter() *gin.Engine {
 		c.String(200, "pong")
 	})
 
+	r.GET("/helper/get_annotated_image", controllers.GetAnnotatedImage)
+
 	mq := r.Group("/message_queue")
 	mq.Use(middlewares.MessageQueueAuth)
 	{
