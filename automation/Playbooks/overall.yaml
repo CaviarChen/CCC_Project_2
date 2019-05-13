@@ -2,8 +2,6 @@
 - hosts: all
   vars_files:
     - host_vars/comm_config_vars.yaml
-    - host_vars/db_config_vars.yaml
-    - host_vars/vault_vars.yaml
   gather_facts: true
   remote_user: ubuntu
   become: yes
@@ -16,7 +14,20 @@
   roles:
     - config_comm
     - mount_volumes
+
+- hosts: all
+  vars_files:
+    - host_vars/comm_config_vars.yaml
+    - host_vars/db_config_vars.yaml
+    - host_vars/vault_vars.yaml
+  gather_facts: true
+  remote_user: ubuntu
+  become: yes
+  become_method: sudo
+
+  roles:
     - config_db_all
+
 
 - hosts: alfa
   vars_files:
@@ -44,15 +55,12 @@
 
 - hosts: localhost
   vars_files:
-    - host_vars/comm_config_vars.yaml
     - host_vars/db_config_vars.yaml
     - host_vars/docker_vars.yaml
     - host_vars/vault_vars.yaml
   gather_facts: true
-  remote_user: ubuntu
   become: yes
   become_method: sudo
-
   roles:
     - build_dockers
 
@@ -66,7 +74,6 @@
   remote_user: ubuntu
   become: yes
   become_method: sudo
-
   roles:
     - schedule_jobs
 
@@ -80,6 +87,30 @@
   remote_user: ubuntu
   become: yes
   become_method: sudo
-
   roles:
     - schedule_go_backend
+
+- hosts: localhost
+  vars_files:
+    - host_vars/comm_config_vars.yaml
+  gather_facts: true
+  remote_user: ubuntu
+  become: yes
+  become_method: sudo
+
+  roles:
+    - build_frontend
+
+- hosts: alfa, bravo
+  vars_files:
+    - host_vars/comm_config_vars.yaml
+    - host_vars/db_config_vars.yaml
+    - host_vars/docker_vars.yaml
+    - host_vars/vault_vars.yaml
+  gather_facts: true
+  remote_user: ubuntu
+  become: yes
+  become_method: sudo
+  roles:
+    - config_frontend
+    - config_nginx
