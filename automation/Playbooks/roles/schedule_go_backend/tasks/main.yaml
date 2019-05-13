@@ -4,6 +4,8 @@
     name: go_backend_{{ ansible_hostname }}
     image: registry.gitlab.com/{{ docker_private_user }}/ccc_project_2/go_backend:latest
     restart_policy: always
+    ports:
+      - "8888:8888"
     env:
         HTTP_PROXY: "http://wwwproxy.unimelb.edu.au:8000"
         HTTPS_PROXY: "http://wwwproxy.unimelb.edu.au:8000"
