@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import mapboxgl from 'mapbox-gl'
-import { Drawer, Collapse, Spin, Card, Tag, Divider } from 'antd'
-import { Bar, Pie, Radar } from 'react-chartjs-2'
+import { Drawer, Collapse, Spin, Card, Tag, Divider, Statistic, Row, Col, Icon } from 'antd'
+import { Bar, Pie, Doughnut } from 'react-chartjs-2'
 import Axios from 'axios';
 import 'mapbox-gl/dist/mapbox-gl.css'
 
@@ -40,15 +40,19 @@ class Map extends Component {
       current_pd_docid: null,
       pieData: null,
       barData: null,
+      doughnutData: null,
       sa2name: null,
-      current_pd_data: null
+      current_pd_data: null,
+      total_tweet: null,
+      related_tweet: null,
+      image_tweet: null
     };
   }
 
   loadData = async (map) => {
 
     const reqs = [];
-    reqs.push(Axios.get(DATABASE_URL + 'tweet_data/_design/designDoc/_view/get_surburb_summary?group=true'));
+    reqs.push(Axios.get(DATABASE_URL + 'tweet_data/_design/designDoc/_view/get_surburb_summary_image?group=true'));
     reqs.push(Axios.get(mel_geo_basic_url));
     reqs.push(Axios.get(DATABASE_URL + 'tweet_data/_design/designDoc/_view/sample_points'));
     reqs.push(Axios.get(mel_census_data));
@@ -76,6 +80,7 @@ class Map extends Component {
       if (key > 0 && key < 310) {
         basic.features[key - 1].properties['TOTAL_TWEET'] = adder.rows[i].value[1]
         basic.features[key - 1].properties['RELATED_TWEET'] = adder.rows[i].value[0]
+        basic.features[key - 1].properties['IMAGE_TWEET'] = adder.rows[i].value[2]
         basic.features[key - 1].properties['RELATED_TWEET_RATIO'] = adder.rows[i].value[0] / adder.rows[i].value[1] * 1.8;
         basic.features[key - 1].properties['FEMALE_NEVER_MARRIED'] = mel_census['features'][i]['properties']['f_20_24_yr_never_married']
         basic.features[key - 1].properties['FEMALE_TOTAL'] = mel_census['features'][i]['properties']['f_20_24_yr_tot']
@@ -132,27 +137,37 @@ class Map extends Component {
 
   showDrawer = (e) => {
     this.setState({
+      total_tweet: e.properties.TOTAL_TWEET,
+      related_tweet: e.properties.RELATED_TWEET,
+      image_tweet: e.properties.IMAGE_TWEET,
       advisible: true,
       sa2name: e.properties.SA2_NAME16,
-      pieData: {
+
+      doughnutData: {
         labels: [
           'UnRelated Tweet',
-          'Related Tweet'
+          'Related Text Tweet',
+          'Related Image Tweet'
         ],
         datasets: [{
-          data: [e.properties.TOTAL_TWEET - e.properties.RELATED_TWEET, e.properties.RELATED_TWEET],
+          data: [e.properties.TOTAL_TWEET - e.properties.RELATED_TWEET, e.properties.RELATED_TWEET - e.properties.IMAGE_TWEET, e.properties.IMAGE_TWEET],
           backgroundColor: [
-            '#36A2EB',
-            '#FF6384',
+          '#FF6384',
+          '#36A2EB',
+          '#FFCE56'
           ],
           hoverBackgroundColor: [
-            '#36A2EB',
-            '#FF6384',
+          '#FF6384',
+          '#36A2EB',
+          '#FFCE56'
           ]
         }]
       },
+
       barData: {
         labels: [
+          'Related tweet',
+          'Total tweet',
           'Female never married',
           'Female total',
           'Person never married',
@@ -166,9 +181,11 @@ class Map extends Component {
           hoverBackgroundColor: 'rgba(255, 99, 132, 0.4)',
           hoverBorderColor: 'rgba(255, 99, 132, 1)',
           data: [
-            e.properties.FEMALE_NEVER_MARRIED, 
-            e.properties.FEMALE_TOTAL, 
-            e.properties.PERSON_NEVER_MARRIED, 
+            e.properties.RELATED_TWEET,
+            e.properties.TOTAL_TWEET,
+            e.properties.FEMALE_NEVER_MARRIED,
+            e.properties.FEMALE_TOTAL,
+            e.properties.PERSON_NEVER_MARRIED,
             e.properties.PERSON_TOTAL
           ]
         }]
@@ -191,8 +208,8 @@ class Map extends Component {
   };
 
   loadPdData = async (docid) => {
-    const res = await Axios.get(DATABASE_URL + '/tweet_data/' +  docid)
-    if(docid === this.state.current_pd_docid){
+    const res = await Axios.get(DATABASE_URL + '/tweet_data/' + docid)
+    if (docid === this.state.current_pd_docid) {
       this.setState({
         current_pd_data: res.data.data,
       })
@@ -370,7 +387,7 @@ class Map extends Component {
             id: hoveredStateId
           }, {
               hover: false
-          });
+            });
         }
         hoveredStateId = e.features[0].id;
         map.setFeatureState({
@@ -378,7 +395,7 @@ class Map extends Component {
           id: hoveredStateId
         }, {
             hover: true
-        });
+          });
       }
     });
 
@@ -389,7 +406,7 @@ class Map extends Component {
           id: hoveredStateId
         }, {
             hover: false
-        });
+          });
       }
     });
   }
@@ -421,15 +438,26 @@ class Map extends Component {
         >
           <Collapse defaultActiveKey={['1', '2']}>
             <Panel header="Related Tweet Pie Chart" key="1">
-              <Pie 
-                data={this.state.pieData} 
-                width={100} 
+              <Row gutter={16}>
+                <Col span={8}>
+                  <Statistic title="Total Tweets" value={this.state.total_tweet} prefix={<Icon type="twitter" style={{ color: "#1DA1F2" }} />} />
+                </Col>
+                <Col span={8}>
+                  <Statistic title="Related Tweets" value={this.state.related_tweet} suffix={ '/ ' + this.state.total_tweet} />
+                </Col>
+                <Col span={8}>
+                  <Statistic title="Image Tweets" value={this.state.image_tweet} suffix={ '/ ' + this.state.related_tweet} prefix={<Icon type="picture" style={{ color: "#1DA1F2" }} />}/>
+                </Col>
+              </Row>
+              <Doughnut
+                data={this.state.doughnutData}
+                width={100}
                 height={120} />
             </Panel>
             <Panel header="Relationship Bar Chart" key="2">
-              <Bar 
-                data={this.state.barData} 
-                width={100} 
+              <Bar
+                data={this.state.barData}
+                width={100}
                 height={120}
                 options={bar_option} />
             </Panel>
@@ -478,10 +506,10 @@ function PDDrawCard(props) {
         })}
       </div>
       <Divider />
-    <img 
-      alt="tweetimage"
-      src={ data.images[0].url }
-      width='100%' />
+      <img
+        alt="tweetimage"
+        src={data.images[0].url}
+        width='100%' />
     </Card>
   );
 }
