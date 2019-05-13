@@ -7,7 +7,7 @@ import 'mapbox-gl/dist/mapbox-gl.css'
 
 import AppLayout from './layouts/AppLayout'
 
-import { TOKEN, DATABASE_URL } from './config.js'
+import { TOKEN, DATABASE_URL, GOBACKEND_URL } from './config.js'
 import * as mel_geo_basic_url from './melbourne_avgpoints.geojson'
 import * as mel_census_data from './melb_census.geojson'
 
@@ -508,7 +508,7 @@ function PDDrawCard(props) {
       <Divider />
       <img
         alt="tweetimage"
-        src={data.images[0].url}
+        src={ GOBACKEND_URL + "helper/get_annotated_image?image_url=" + encodeURIComponent(data.images[0].url)}
         width='100%' />
     </Card>
   );
