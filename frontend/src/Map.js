@@ -1,74 +1,15 @@
 import React, { Component } from 'react'
 import mapboxgl from 'mapbox-gl'
-import { Drawer, Collapse, Spin, Card } from 'antd'
-import { Radar, Pie, Line } from 'react-chartjs-2'
+import { Drawer, Collapse, Spin, Card, Tag } from 'antd'
+import { Bar, Pie, Radar } from 'react-chartjs-2'
 import Axios from 'axios';
 import 'mapbox-gl/dist/mapbox-gl.css'
 
 import AppLayout from './layouts/AppLayout'
 
-import { TOKEN, AREA_URL, POINT_URL } from './config.js'
+import { TOKEN, DATABASE_URL } from './config.js'
 import * as mel_geo_basic_url from './melbourne_avgpoints.geojson'
-
-var pieData = null;
-var sa2name = null;
-var pointText = null;
-var pointWOI = null;
-var pointName = null;
-
-const radarData = {
-  labels: ['Eating', 'Drinking', 'Sleeping', 'Designing', 'Coding', 'Cycling', 'Running'],
-  datasets: [
-    {
-      label: 'My First dataset',
-      backgroundColor: 'rgba(179,181,198,0.2)',
-      borderColor: 'rgba(179,181,198,1)',
-      pointBackgroundColor: 'rgba(179,181,198,1)',
-      pointBorderColor: '#fff',
-      pointHoverBackgroundColor: '#fff',
-      pointHoverBorderColor: 'rgba(179,181,198,1)',
-      data: [65, 59, 90, 81, 56, 55, 40]
-    },
-    {
-      label: 'My Second dataset',
-      backgroundColor: 'rgba(255,99,132,0.2)',
-      borderColor: 'rgba(255,99,132,1)',
-      pointBackgroundColor: 'rgba(255,99,132,1)',
-      pointBorderColor: '#fff',
-      pointHoverBackgroundColor: '#fff',
-      pointHoverBorderColor: 'rgba(255,99,132,1)',
-      data: [28, 48, 40, 19, 96, 27, 100]
-    }
-  ]
-};
-
-const lineData = {
-  labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
-  datasets: [
-    {
-      label: 'My First dataset',
-      fill: false,
-      lineTension: 0.1,
-      backgroundColor: 'rgba(75,192,192,0.4)',
-      borderColor: 'rgba(75,192,192,1)',
-      borderCapStyle: 'butt',
-      borderDash: [],
-      borderDashOffset: 0.0,
-      borderJoinStyle: 'miter',
-      pointBorderColor: 'rgba(75,192,192,1)',
-      pointBackgroundColor: '#fff',
-      pointBorderWidth: 1,
-      pointHoverRadius: 5,
-      pointHoverBackgroundColor: 'rgba(75,192,192,1)',
-      pointHoverBorderColor: 'rgba(220,220,220,1)',
-      pointHoverBorderWidth: 2,
-      pointRadius: 1,
-      pointHitRadius: 10,
-      data: [65, 59, 80, 81, 56, 55, 40]
-    }
-  ]
-};
-
+import * as mel_census_data from './melb_census.geojson'
 
 const Panel = Collapse.Panel;
 
@@ -86,24 +27,33 @@ class Map extends Component {
       advisible: false,
       pdvisible: false,
       map: null,
-      is_loading: true
+      is_loading: true,
+      current_pd_docid: null,
+
+      pieData: null,
+      barData: null,
+      sa2name: null,
+      current_pd_data: null
     };
   }
 
   loadData = async (map) => {
 
     const reqs = [];
-    reqs.push(Axios.get(AREA_URL));
+    reqs.push(Axios.get(DATABASE_URL + 'tweet_data/_design/designDoc/_view/get_surburb_summary?group=true'));
     reqs.push(Axios.get(mel_geo_basic_url));
-    reqs.push(Axios.get(POINT_URL));
+    reqs.push(Axios.get(DATABASE_URL + 'tweet_data/_design/designDoc/_view/sample_points'));
+    reqs.push(Axios.get(mel_census_data));
 
     const res = await Axios.all(reqs);
     let adder = res[0].data
     let mel_geo_basic = res[1].data
     let mel_geo_point = res[2].data
+    let mel_census = res[3].data
 
-    let areaData = this.appendProperties(mel_geo_basic, adder)
+    let areaData = this.appendProperties(mel_geo_basic, adder, mel_census)
     let pointData = this.makeGeoPoints(mel_geo_point)
+    console.log(pointData)
     this.setState({
       is_loading: false,
     });
@@ -112,7 +62,7 @@ class Map extends Component {
     map.getSource('points').setData(pointData);
   }
 
-  appendProperties = (basic, adder) => {
+  appendProperties = (basic, adder, mel_census) => {
 
     for (let i = 0; i < adder.rows.length; i++) {
       let key = adder.rows[i].key
@@ -120,6 +70,10 @@ class Map extends Component {
         basic.features[key - 1].properties['TOTAL_TWEET'] = adder.rows[i].value[1]
         basic.features[key - 1].properties['RELATED_TWEET'] = adder.rows[i].value[0]
         basic.features[key - 1].properties['RELATED_TWEET_RATIO'] = adder.rows[i].value[0] / adder.rows[i].value[1] * 1.8;
+        basic.features[key - 1].properties['FEMALE_NEVER_MARRIED'] = mel_census['features'][i]['properties']['f_20_24_yr_never_married']
+        basic.features[key - 1].properties['FEMALE_TOTAL'] = mel_census['features'][i]['properties']['f_20_24_yr_tot']
+        basic.features[key - 1].properties['PERSON_NEVER_MARRIED'] = mel_census['features'][i]['properties']['p_20_24_yr_never_married']
+        basic.features[key - 1].properties['PERSON_TOTAL'] = mel_census['features'][i]['properties']['p_20_24_yr_tot']
       }
     }
     return basic
@@ -133,15 +87,13 @@ class Map extends Component {
       geo.features.push({
         "type": "Feature",
         "properties": {
-          "text": data.rows[i].value.text,
-          "words_of_interest": data.rows[i].value.words_of_interest,
-          "name": data.rows[i].value.user.name
+          "id": data.rows[i].id
         },
         "geometry": {
           "type": "Point",
           "coordinates": [
-            data.rows[i].value.geo.longtitude,
-            data.rows[i].value.geo.latitude
+            data.rows[i].value.longtitude,
+            data.rows[i].value.latitude
           ]
         }
       })
@@ -172,29 +124,50 @@ class Map extends Component {
   }
 
   showDrawer = (e) => {
-    sa2name = e.properties.SA2_NAME16
-
-    pieData = {
-      labels: [
-        'UnRelated Tweet',
-        'Related Tweet'
-      ],
-      datasets: [{
-        data: [e.properties.TOTAL_TWEET - e.properties.RELATED_TWEET, e.properties.RELATED_TWEET],
-        backgroundColor: [
-          '#36A2EB',
-          '#FF6384',
-        ],
-        hoverBackgroundColor: [
-          '#36A2EB',
-          '#FF6384',
-        ]
-      }]
-    };
 
     this.setState({
       advisible: true,
-    });
+      sa2name: e.properties.SA2_NAME16,
+      pieData: {
+        labels: [
+          'UnRelated Tweet',
+          'Related Tweet'
+        ],
+        datasets: [{
+          data: [e.properties.TOTAL_TWEET - e.properties.RELATED_TWEET, e.properties.RELATED_TWEET],
+          backgroundColor: [
+            '#36A2EB',
+            '#FF6384',
+          ],
+          hoverBackgroundColor: [
+            '#36A2EB',
+            '#FF6384',
+          ]
+        }]
+      },
+      barData: {
+        labels: [
+          'Female never married',
+          'Female total',
+          'Person never married',
+          'Person total'
+        ],
+        datasets: [{
+          label: 'Number',
+          backgroundColor: 'rgba(255, 99, 132, 0.2)',
+          borderColor: 'rgba(255, 99, 132, 1)',
+          borderWidth: 1,
+          hoverBackgroundColor: 'rgba(255, 99, 132, 0.4)',
+          hoverBorderColor: 'rgba(255, 99, 132, 1)',
+          data: [
+            e.properties.FEMALE_NEVER_MARRIED, 
+            e.properties.FEMALE_TOTAL, 
+            e.properties.PERSON_NEVER_MARRIED, 
+            e.properties.PERSON_TOTAL
+          ]
+        }]
+      }
+    })
   };
 
   onClose = () => {
@@ -204,18 +177,26 @@ class Map extends Component {
   };
 
   showPdDrawer = (e) => {
-    pointText = e.properties.text
-    pointWOI = e.properties.words_of_interest
-    pointName = e.properties.name
-
     this.setState({
       pdvisible: true,
+      current_pd_docid: e.properties.id
     });
+    this.loadPdData(e.properties.id);
   };
+
+  loadPdData = async (docid) => {
+    const res = await Axios.get(DATABASE_URL + '/tweet_data/' +  docid)
+    if(docid === this.state.current_pd_docid){
+      this.setState({
+        current_pd_data: res.data.data,
+      })
+    }
+  }
 
   onPdClose = () => {
     this.setState({
       pdvisible: false,
+      current_pd_data: null
     });
   };
 
@@ -270,15 +251,6 @@ class Map extends Component {
             0.9, '#512015',
             1, '#000000'
           ],
-          // 'fill-color': [
-          //   "rgb",
-          //   // red is higher when feature.properties.temperature is higher
-          //   ["get", "COLOR_RATIO"],
-          //   // green is always zero
-          //   200,
-          //   // blue is higher when feature.properties.temperature is lower
-          //   ["-", 255, ["get", "COLOR_RATIO"]]
-          // ],
           "fill-opacity": ["case",
             ["boolean", ["feature-state", "hover"], false],
             0.8,
@@ -444,48 +416,75 @@ class Map extends Component {
           ref={el => this.mapContainer = el}
           className="mapbox map" />
         <Drawer
-          title={sa2name}
-          width="30%"
+          title={this.state.sa2name}
+          width="35%"
           placement="right"
           closable={false}
           onClose={this.onClose}
           visible={this.state.advisible}
         >
-          <Collapse defaultActiveKey={['1']}>
-            <Panel header="This is panel header 1" key="1">
-              <Pie data={pieData} width={100} />
+          <Collapse defaultActiveKey={['1', '2']}>
+            <Panel header="Related Tweet Pie Chart" key="1">
+              <Pie 
+                data={this.state.pieData} 
+                width={100} 
+                height={120} />
             </Panel>
-            <Panel header="This is panel header 2" key="2">
-              <Line data={lineData} width={100} />
-            </Panel>
-            <Panel header="This is panel header 3" key="3">
-              <Radar data={radarData} width={100} />
+            <Panel header="Relationship Bar Chart" key="2">
+              <Bar 
+                data={this.state.barData} 
+                width={100} 
+                height={120} />
             </Panel>
           </Collapse>
         </Drawer>
 
         <Drawer
-          title={'@' + pointName}
-          width="30%"
+          title="Tweet Content"
+          width="35%"
           placement="right"
           closable={false}
           onClose={this.onPdClose}
           visible={this.state.pdvisible}
         >
-
-          <Card
-            title="Tweet Content"
-            style={{ width: '100%' }}
-          >
-            <p>{pointText}</p>
-            <p>{pointWOI}</p>
-          </Card>
+          
+          <PDDrawCard data={this.state.current_pd_data} />
 
         </Drawer>
       </AppLayout>
 
     );
   }
+}
+
+
+function PDDrawCard(props) {
+  const data = props.data;
+  if (data == null) {
+    return (<Card
+      title={'loading'}
+      style={{ width: '100%' }}
+    >
+      <p>{'loading'}</p>
+    </Card>);
+  }
+  return (<Card
+    title={'@' + data.user.name}
+    style={{ width: '100%' }}
+    cover={<img alt="tweetimage" src={data.images[0].url} />}
+  >
+    <p>{data.text}</p>
+    <div>
+        {data.words_of_interest.map((tag, index) => {
+          const tagElem = (
+            <Tag key={tag}>
+              {tag}
+            </Tag>
+          );
+          return tagElem;
+        })}
+    </div>
+  </Card>);
 }
 
 export default Map;
