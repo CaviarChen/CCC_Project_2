@@ -58,7 +58,7 @@ class Statistics extends Component {
       import_tweet: {
         labels: import_date,
         datasets: [{
-          label: 'Import Tweet',
+          label: 'Imported Tweet',
           fill: false,
           lineTension: 0.1,
           backgroundColor: 'rgba(75,192,192,0.4)',
@@ -82,7 +82,7 @@ class Statistics extends Component {
       harvest_tweet: {
         labels: harvest_date,
         datasets: [{
-          label: 'Harvest Tweet',
+          label: 'Harvested Tweet',
           fill: false,
           lineTension: 0.1,
           backgroundColor: 'rgba(75,192,192,0.4)',
