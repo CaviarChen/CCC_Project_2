@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 
 import Map from './Map'
 import Project from './Project'
-import Statistic from './Statistic'
+import Statistics from './Statistics'
 
 class App extends Component {
 
@@ -13,7 +13,7 @@ class App extends Component {
         <Switch>
           <Route exact path="/" component={Map} />
           <Route path="/project" component={Project} />
-          <Route path="/statistic" component={Statistic} />
+          <Route path="/statistics" component={Statistics} />
         </Switch>
       </Router>
     );

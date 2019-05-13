@@ -20,8 +20,8 @@ const AppHeader = withRouter(props => {
         <Menu.Item key="/">
           <Link to="/">Visualization</Link>
         </Menu.Item>
-        <Menu.Item key="/statistic">
-          <Link to="/statistic">Statistic</Link>
+        <Menu.Item key="/statistics">
+          <Link to="/statistics">Statistics</Link>
         </Menu.Item>
       </Menu>
     </Header>
