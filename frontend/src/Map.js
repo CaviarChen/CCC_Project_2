@@ -168,10 +168,10 @@ class Map extends Component {
         labels: [
           'Related tweet',
           'Total tweet',
-          'Female never married',
-          'Female total',
-          'Person never married',
-          'Person total'
+          '20-24 aged Female never married',
+          '20-24 aged Female total',
+          '20-24 aged Person never married',
+          '20-24 aged Person total'
         ],
         datasets: [{
           label: 'Number',
