@@ -14,7 +14,7 @@
 
 - name: Build static site
   shell: >
-    node --max_old_space_size=12000 /usr/bin/npm run build
+    node --max_old_space_size=15000 /usr/bin/npm run build
   args:
     executable: /bin/bash
     chdir: /home/ubuntu/CCC_Project_2/frontend
