@@ -1,5 +1,4 @@
 #!/bin/bash
-set -x
 
 echo "Please select the job you want to run: "
 echo "1) Create instances"
@@ -9,7 +8,6 @@ echo "4) Configure Nginx"
 echo "5) Run job dockers - Harvester, Importer, Preprocessor and Go-backend"
 echo "6) Deploy frond end app"
 echo "0) Run all jobs listed above"
-echo ""
 
 read inpt
 
@@ -45,5 +43,3 @@ case $inpt in
         echo "Invalid job number entered. Please enter '1', '2', etc."
         ;;
 esac
-
-set +x
