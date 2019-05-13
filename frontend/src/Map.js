@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import mapboxgl from 'mapbox-gl'
-import { Drawer, Collapse, Spin, Card, Tag } from 'antd'
+import { Drawer, Collapse, Spin, Card, Tag, Divider } from 'antd'
 import { Bar, Pie, Radar } from 'react-chartjs-2'
 import Axios from 'axios';
 import 'mapbox-gl/dist/mapbox-gl.css'
@@ -468,7 +468,6 @@ class Map extends Component {
   }
 }
 
-
 function PDDrawCard(props) {
   const data = props.data;
   if (data == null) {
@@ -482,11 +481,10 @@ function PDDrawCard(props) {
   return (<Card
     title={'@' + data.user.name}
     style={{ width: '100%' }}
-    cover={<img alt="tweetimage" src={data.images[0].url} />}
   >
     <p>{data.text}</p>
     <div>
-        {data.words_of_interest.map((tag, index) => {
+        {data.words_of_interest.map((tag) => {
           const tagElem = (
             <Tag key={tag}>
               {tag}
@@ -495,6 +493,9 @@ function PDDrawCard(props) {
           return tagElem;
         })}
     </div>
+    <Divider />
+    <img alt="tweetimage" src={data.images[0].url } width='100%'/>
+    
   </Card>);
 }
 
