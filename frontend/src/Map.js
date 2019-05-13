@@ -8,6 +8,8 @@ import 'mapbox-gl/dist/mapbox-gl.css'
 import AppLayout from './layouts/AppLayout'
 
 import { TOKEN, DATABASE_URL } from './config.js'
+import Boundingbox from 'react-bounding-box'
+
 import * as mel_geo_basic_url from './melbourne_avgpoints.geojson'
 import * as mel_census_data from './melb_census.geojson'
 
@@ -506,10 +508,24 @@ function PDDrawCard(props) {
         })}
       </div>
       <Divider />
-      <img
-        alt="tweetimage"
-        src={data.images[0].url}
-        width='100%' />
+      <Boundingbox
+        // image={DATABASE_URL + "tweet_image_with_yolo/" + encodeURIComponent(data.images[0].url) + "/small.jpg"}
+        image={data.images[0].url + ":small"}
+        // [{coord: [0, 0, 250, 250], label: "test"}]
+        boxes={data.images[0].yolo.map(x => {
+          return {
+            coord: [x.left, x.top, x.right - x.left, x.bottom - x.top],
+            label: x['class']
+          }
+        })}
+        options={{
+          colors: {
+            normal: 'rgba(255,225,255,1)',
+            selected: 'rgba(0,225,204,1)',
+            unselected: 'rgba(100,100,100,1)'
+          }
+        }}
+      />
     </Card>
   );
 }
