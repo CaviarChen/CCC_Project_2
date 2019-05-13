@@ -20,6 +20,7 @@
 - name: Start the Nginx docker
   shell: >
     docker run
+    --restart=always
     -p 8080:8080
     -p 80:80
     -v /home/ubuntu/nginx.conf:/etc/nginx/conf.d/default.conf
