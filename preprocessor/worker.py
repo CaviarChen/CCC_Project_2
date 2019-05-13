@@ -25,6 +25,7 @@ class Worker:
                 self.handle_one()
             except Exception as e:
                 self.log("unknown error: ", e)
+                time.sleep(5)
             
             time.sleep(0.2)
 
@@ -52,6 +53,7 @@ class Worker:
             self.process_one(tweet_type, job_doc)
         except Exception as e:
             self.log("error during processing: ", job_id, e)
+            time.sleep(1)
             return
         
         # mark as finished
@@ -60,6 +62,7 @@ class Worker:
             self.log("job finished: ", tweet_type, job_id)
         except Exception as e:
             self.log("unable to finish a job: ", job_id, e)
+            time.sleep(1)
 
 
     def process_one(self, tweet_type: str, job_doc: cloudant.document) -> None:
