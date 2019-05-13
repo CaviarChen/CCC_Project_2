@@ -38,7 +38,6 @@ class Map extends Component {
       map: null,
       is_loading: true,
       current_pd_docid: null,
-
       pieData: null,
       barData: null,
       sa2name: null,
@@ -62,7 +61,7 @@ class Map extends Component {
 
     let areaData = this.appendProperties(mel_geo_basic, adder, mel_census)
     let pointData = this.makeGeoPoints(mel_geo_point)
-    console.log(pointData)
+
     this.setState({
       is_loading: false,
     });
@@ -72,7 +71,6 @@ class Map extends Component {
   }
 
   appendProperties = (basic, adder, mel_census) => {
-
     for (let i = 0; i < adder.rows.length; i++) {
       let key = adder.rows[i].key
       if (key > 0 && key < 310) {
@@ -85,7 +83,6 @@ class Map extends Component {
         basic.features[key - 1].properties['PERSON_TOTAL'] = mel_census['features'][i]['properties']['p_20_24_yr_tot']
       }
     }
-
     return basic
   }
 
@@ -134,7 +131,6 @@ class Map extends Component {
   }
 
   showDrawer = (e) => {
-
     this.setState({
       advisible: true,
       sa2name: e.properties.SA2_NAME16,
@@ -227,12 +223,10 @@ class Map extends Component {
     var hoveredStateId = null;
 
     map.on('load', (function () {
-
       map.addSource('suburbs', {
         'type': 'geojson',
         'data': null,
       })
-
       map.addSource('points', {
         'type': 'geojson',
         'data': null
@@ -347,11 +341,6 @@ class Map extends Component {
       });
     }).bind(this))
 
-
-    // map.on('click', 'suburb-fills', this.onAreaClick.bind(this));
-
-    // map.on('click', 'test-point', this.onPointClick.bind(this));
-
     map.on('click', function (e) {
       let f = map.queryRenderedFeatures(e.point, { layers: ['test-point'] })
       if (f.length) {
@@ -362,7 +351,6 @@ class Map extends Component {
           this.onAreaClick(f[0])
         }
       }
-
     }.bind(this));
 
     map.on('mouseenter', 'test-point', function (e) {
@@ -382,7 +370,7 @@ class Map extends Component {
             id: hoveredStateId
           }, {
               hover: false
-            });
+          });
         }
         hoveredStateId = e.features[0].id;
         map.setFeatureState({
@@ -390,7 +378,7 @@ class Map extends Component {
           id: hoveredStateId
         }, {
             hover: true
-          });
+        });
       }
     });
 
@@ -401,18 +389,16 @@ class Map extends Component {
           id: hoveredStateId
         }, {
             hover: false
-          });
+        });
       }
     });
   }
 
   render() {
-
     const style = {
       width: '100%',
       height: '100%'
     };
-
     return (
       <AppLayout>
         <Spin
@@ -449,7 +435,6 @@ class Map extends Component {
             </Panel>
           </Collapse>
         </Drawer>
-
         <Drawer
           title="Tweet Content"
           width="35%"
@@ -458,12 +443,9 @@ class Map extends Component {
           onClose={this.onPdClose}
           visible={this.state.pdvisible}
         >
-          
           <PDDrawCard data={this.state.current_pd_data} />
-
         </Drawer>
       </AppLayout>
-
     );
   }
 }
@@ -471,19 +453,21 @@ class Map extends Component {
 function PDDrawCard(props) {
   const data = props.data;
   if (data == null) {
-    return (<Card
-      title={'loading'}
+    return (
+      <Card
+        title={'loading'}
+        style={{ width: '100%' }}
+      >
+        <p>{'loading'}</p>
+      </Card>);
+  }
+  return (
+    <Card
+      title={'@' + data.user.name}
       style={{ width: '100%' }}
     >
-      <p>{'loading'}</p>
-    </Card>);
-  }
-  return (<Card
-    title={'@' + data.user.name}
-    style={{ width: '100%' }}
-  >
-    <p>{data.text}</p>
-    <div>
+      <p>{data.text}</p>
+      <div>
         {data.words_of_interest.map((tag) => {
           const tagElem = (
             <Tag key={tag}>
@@ -492,11 +476,14 @@ function PDDrawCard(props) {
           );
           return tagElem;
         })}
-    </div>
-    <Divider />
-    <img alt="tweetimage" src={data.images[0].url } width='100%'/>
-    
-  </Card>);
+      </div>
+      <Divider />
+    <img 
+      alt="tweetimage"
+      src={ data.images[0].url }
+      width='100%' />
+    </Card>
+  );
 }
 
 export default Map;
