@@ -25,11 +25,11 @@ const (
 )
 
 func Init() {
-	go fetchJobsToChannel("import_job", `finished == false && lock_timestamp <= %d`, chanImportJobs, importJobTimeout)
-	go fetchJobsToChannel("harvest_twitter_user", `last_harvest <= %d`, chanHarvestUserJobs, userHarvestJobInterval)
+	go fetchJobsToChannelRecover("import_job", `finished == false && lock_timestamp <= %d`, chanImportJobs, importJobTimeout)
+	go fetchJobsToChannelRecover("harvest_twitter_user", `last_harvest <= %d`, chanHarvestUserJobs, userHarvestJobInterval)
 	query := `process_meta.processed == false && process_meta.lock_timestamp <= %d`
-	go fetchJobsToChannel("harvest_twitter_tweet", query, chanPreprocessJobsFromHarvestDb, preprocessJobTimeout)
-	go fetchJobsToChannel("import_twitter_tweet", query, chanPreprocessJobsFromImportDb, preprocessJobTimeout)
+	go fetchJobsToChannelRecover("harvest_twitter_tweet", query, chanPreprocessJobsFromHarvestDb, preprocessJobTimeout)
+	go fetchJobsToChannelRecover("import_twitter_tweet", query, chanPreprocessJobsFromImportDb, preprocessJobTimeout)
 }
 
 // uses buffered channel to limit the things loaded into go_backend
@@ -38,16 +38,26 @@ var chanHarvestUserJobs = make(chan string, 1)
 var chanPreprocessJobsFromImportDb = make(chan string, 1)
 var chanPreprocessJobsFromHarvestDb = make(chan string, 1)
 
+func fetchJobsToChannelRecover(dbname string, queryString string, channel chan string, lockTimeout int64) {
+	for {
+		fetchJobsToChannel(dbname, queryString, channel, lockTimeout)
+		log.Printf("Error: fetch jobs in db: %s , restart in 30 sec\n", dbname)
+		time.Sleep(30 * time.Second)
+	}
+}
+
 func fetchJobsToChannel(dbname string, queryString string, channel chan string, lockTimeout int64) {
-	log.Print("start fecthing db: " + dbname + "\n")
+	log.Println("start fecthing db: " + dbname + "\n")
 	// connect to db
 	server, err := couchdb.NewServer(config.GetCouchDBUrl())
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return
 	}
 	db, err := server.Get(dbname)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return
 	}
 
 	// loop and add to queue
@@ -58,7 +68,8 @@ func fetchJobsToChannel(dbname string, queryString string, channel chan string, 
 		s := fmt.Sprintf(queryString, time.Now().Unix()-lockTimeout)
 		resList, err := db.Query([]string{"_id"}, s, nil, loadSize, nil, nil)
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
+			return
 		}
 		log.Printf("fetch a betch from db: %s, got: %d \n", dbname, len(resList))
 
@@ -70,9 +81,8 @@ func fetchJobsToChannel(dbname string, queryString string, channel chan string, 
 
 		if len(resList) < loadSize {
 			log.Print(dbname + " no job wait\n")
-			time.Sleep(noJobWait * 1000 * time.Millisecond)
+			time.Sleep(noJobWait * time.Second)
 		}
-
 	}
 }
 
