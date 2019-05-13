@@ -12,6 +12,7 @@ class AppLayout extends Component {
       <PageHeader 
         title="COMP90024 Cluster and Cloud Computing Project 2"
         subTitle="Team 42"
+        style={{ height: "6vh" }}
       />
         <AppHeader />
         <Content style={{ padding: '0 0px', marginTop: 0 }}>

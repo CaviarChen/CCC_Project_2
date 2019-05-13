@@ -7,11 +7,11 @@ const { Header } = Layout;
 const AppHeader = withRouter(props => {
   const { location } = props;
   return (
-    <Header style={{ zIndex: 1, width: '100%' , height: '48px'}}>
+    <Header style={{ zIndex: 1, width: '100%' , height: '6vh'}}>
       <Menu
         theme="dark"
         mode="horizontal"
-        style={{ lineHeight: '48px' }}
+        style={{ lineHeight: "6vh", height: "6vh" }}
         selectedKeys={[location.pathname]}
       >
         <Menu.Item key="/project">

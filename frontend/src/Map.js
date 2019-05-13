@@ -412,10 +412,6 @@ class Map extends Component {
   }
 
   render() {
-    const style = {
-      width: '100%',
-      height: '100%'
-    };
     return (
       <AppLayout>
         <Spin
@@ -425,7 +421,7 @@ class Map extends Component {
           tip="Loading..."
           style={{ position: "absolute", margin: "auto", top: "50%", left: "50%", zIndex: "1000" }} />
         <div
-          style={style}
+          style={{ height: "88vh" }}
           ref={el => this.mapContainer = el}
           className="mapbox map" />
         <Drawer
