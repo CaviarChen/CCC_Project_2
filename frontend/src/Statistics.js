@@ -1,12 +1,15 @@
 import React, { Component } from 'react';
+// import { Col, Row, Statistic } from 'antd';
+
 import AppLayout from './layouts/AppLayout';
 
-class Statistic extends Component {
+
+class Statistics extends Component {
   render() {
     return (
       <AppLayout>
         <div>
-          <h2>Statistic</h2>
+          <h2>Statistics</h2>
           hahahahahaha
         </div>
       </AppLayout>
@@ -14,4 +17,4 @@ class Statistic extends Component {
   }
 }
 
-export default Statistic;
+export default Statistics;
