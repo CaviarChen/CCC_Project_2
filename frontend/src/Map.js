@@ -12,6 +12,15 @@ import * as mel_geo_basic_url from './melbourne_avgpoints.geojson'
 import * as mel_census_data from './melb_census.geojson'
 
 const Panel = Collapse.Panel;
+const bar_option = {
+  scales: {
+    yAxes: [{
+      ticks: {
+        beginAtZero: true
+      }
+    }]
+  }
+};
 
 mapboxgl.accessToken = TOKEN;
 
@@ -76,6 +85,7 @@ class Map extends Component {
         basic.features[key - 1].properties['PERSON_TOTAL'] = mel_census['features'][i]['properties']['p_20_24_yr_tot']
       }
     }
+
     return basic
   }
 
@@ -116,7 +126,7 @@ class Map extends Component {
     this.showPdDrawer(e)
     this.state.map.flyTo({
       center: [e.geometry.coordinates[0], e.geometry.coordinates[1]],
-      zoom: 15,
+      zoom: 16,
       bearing: 0,
       speed: 0.4, // make the flying slow
       curve: 2.2, // change the speed at which it zooms out
@@ -434,7 +444,8 @@ class Map extends Component {
               <Bar 
                 data={this.state.barData} 
                 width={100} 
-                height={120} />
+                height={120}
+                options={bar_option} />
             </Panel>
           </Collapse>
         </Drawer>
