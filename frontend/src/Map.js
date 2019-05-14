@@ -1,9 +1,11 @@
 import React, { Component } from 'react'
 import mapboxgl from 'mapbox-gl'
 import { Drawer, Collapse, Spin, Card, Tag, Divider, Statistic, Row, Col, Icon } from 'antd'
-import { Bar, Pie, Doughnut } from 'react-chartjs-2'
+import { Bar, Doughnut } from 'react-chartjs-2'
 import Axios from 'axios';
 import 'mapbox-gl/dist/mapbox-gl.css'
+import './Map.css'
+
 
 import AppLayout from './layouts/AppLayout'
 
@@ -45,7 +47,9 @@ class Map extends Component {
       current_pd_data: null,
       total_tweet: null,
       related_tweet: null,
-      image_tweet: null
+      image_tweet: null,
+      legend_display: 'block',
+      guide_display: 'block'
     };
   }
 
@@ -152,14 +156,14 @@ class Map extends Component {
         datasets: [{
           data: [e.properties.TOTAL_TWEET - e.properties.RELATED_TWEET, e.properties.RELATED_TWEET - e.properties.IMAGE_TWEET, e.properties.IMAGE_TWEET],
           backgroundColor: [
-          '#FF6384',
-          '#36A2EB',
-          '#FFCE56'
+            '#FF6384',
+            '#36A2EB',
+            '#FFCE56'
           ],
           hoverBackgroundColor: [
-          '#FF6384',
-          '#36A2EB',
-          '#FFCE56'
+            '#FF6384',
+            '#36A2EB',
+            '#FFCE56'
           ]
         }]
       },
@@ -409,6 +413,20 @@ class Map extends Component {
           });
       }
     });
+
+    map.on('zoom', function() {
+      if (map.getZoom() >= 10) {
+      this.setState({
+        legend_display: 'none',
+        guide_display: 'none'
+      })
+      } else {
+        this.setState({
+          legend_display: 'block',
+          guide_display: 'block'
+        })
+      }
+      }.bind(this));
   }
 
   render() {
@@ -420,6 +438,26 @@ class Map extends Component {
           size="large"
           tip="Loading..."
           style={{ position: "absolute", margin: "auto", top: "50%", left: "50%", zIndex: "1000" }} />
+        <div class='legend' style={{display: this.state.legend_display}}>
+          <h4>Related Tweets Percentage</h4>
+          <div><span style={{backgroundColor: '#F2F12D'}}></span>0%</div>
+          <div><span style={{backgroundColor: '#EED322'}}></span>10%</div>
+          <div><span style={{backgroundColor: '#E6B71E'}}></span>20%</div>
+          <div><span style={{backgroundColor: '#DA9C20'}}></span>30%</div>
+          <div><span style={{backgroundColor: '#CA8323'}}></span>40%</div>
+          <div><span style={{backgroundColor: '#B86B25'}}></span>50%</div>
+          <div><span style={{backgroundColor: '#A25626'}}></span>60%</div>
+          <div><span style={{backgroundColor: '#8B4225'}}></span>70%</div>
+          <div><span style={{backgroundColor: '#723122'}}></span>80%</div>
+          <div><span style={{backgroundColor: '#512015'}}></span>90%</div>
+          <div><span style={{backgroundColor: '#000000'}}></span>100%</div>
+        </div>
+        <div class='toplegend' style={{display: this.state.guide_display}}>
+          <h4>Quick Guide</h4>
+          <div>1. Click area for Statistic Results.</div>
+          <div>2. Zoom in for detailed inspection.</div>
+          <div>3. Click sample Tweet points for analysis.</div>
+        </div>
         <div
           style={{ height: "88vh" }}
           ref={el => this.mapContainer = el}
@@ -439,10 +477,10 @@ class Map extends Component {
                   <Statistic title="Total Tweets" value={this.state.total_tweet} prefix={<Icon type="twitter" style={{ color: "#1DA1F2" }} />} />
                 </Col>
                 <Col span={8}>
-                  <Statistic title="Related Tweets" value={this.state.related_tweet} suffix={ '/ ' + this.state.total_tweet} />
+                  <Statistic title="Related Tweets" value={this.state.related_tweet} suffix={'/ ' + this.state.total_tweet} />
                 </Col>
                 <Col span={8}>
-                  <Statistic title="Image Tweets" value={this.state.image_tweet} suffix={ '/ ' + this.state.related_tweet} prefix={<Icon type="picture" style={{ color: "#1DA1F2" }} />}/>
+                  <Statistic title="Image Tweets" value={this.state.image_tweet} suffix={'/ ' + this.state.related_tweet} prefix={<Icon type="picture" style={{ color: "#1DA1F2" }} />} />
                 </Col>
               </Row>
               <Doughnut
@@ -504,7 +542,7 @@ function PDDrawCard(props) {
       <Divider />
       <img
         alt="tweetimage"
-        src={ GOBACKEND_URL + "helper/get_annotated_image?image_url=" + encodeURIComponent(data.images[0].url)}
+        src={GOBACKEND_URL + "helper/get_annotated_image?image_url=" + encodeURIComponent(data.images[0].url)}
         width='100%' />
     </Card>
   );
