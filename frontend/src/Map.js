@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import mapboxgl from 'mapbox-gl'
-import { Drawer, Collapse, Spin, Card, Tag, Divider, Statistic, Row, Col, Icon, Select } from 'antd'
+import { Drawer, Collapse, Spin, Card, Tag, Divider, Statistic, Row, Col, Icon, Select, Carousel } from 'antd'
 import { Bar, Doughnut, Line } from 'react-chartjs-2'
 import Axios from 'axios';
 import 'mapbox-gl/dist/mapbox-gl.css'
@@ -52,10 +52,12 @@ class Map extends Component {
       legend_display: 'block',
       guide_display: 'block',
 
-      lineDataYear: null,
+      lineDataYear: 2019,
       rawLineData: null,
-      lineData: null,
-      lineDataYears: null,
+      lineData2016: null,
+      lineData2017: null,
+      lineData2018: null,
+      lineData2019: null,
     };
   }
 
@@ -240,10 +242,16 @@ class Map extends Component {
     const res = await Axios.get(DATABASE_URL + 'tweet_data/_design/designDoc/_view/melbourne_surburb_time_interval?group_level=3&startkey=[' + e.id + ']&endkey=[' + e.id + ', {}, {}]')
     if (e.id === this.state.current_area_code) {
       this.setState({
-        rawLineData: res.data
+        rawLineData: res.data,
       })
-      this.setYearsFromRawLineData()
-      this.setYearData()
+      this.setState({
+        lineData2016: this.setYearData(2016),
+        lineData2017: this.setYearData(2017),
+        lineData2018: this.setYearData(2018),
+        lineData2019: this.setYearData(2019),
+      })
+
+      console.log(this.state.lineData)
     }
   }
 
@@ -254,24 +262,21 @@ class Map extends Component {
     });
   };
 
-  setYearData() {
-    if (this.state.rawLineData === null || this.state.lineDataYear === null){
-      return 
-    }
+  setYearData(year) {
     let timeMap = {}
     let timeLable = []
     let totalValue = []
     let relatedValue = []
     let rows = this.state.rawLineData.rows
-    for(let y=0;y<25;y++){
+    for (let y = 0; y < 25; y++) {
       timeMap[y] = [0, 0]
     }
-    for(let i=0;i<rows.length;i++){
-      if(rows[i].key[1] === this.state.lineDataYear){
+    for (let i = 0; i < rows.length; i++) {
+      if (rows[i].key[1] === year) {
         timeMap[rows[i].key[2]] = rows[i].value
       }
     }
-    for(let n=0;n<25;n++){
+    for (let n = 0; n < 25; n++) {
       relatedValue.push(timeMap[n][0])
       totalValue.push(timeMap[n][1])
       timeLable.push(n.toString() + ':00')
@@ -283,13 +288,13 @@ class Map extends Component {
           label: 'Total Tweet',
           fill: false,
           lineTension: 0.1,
-          backgroundColor: 'rgba(75,192,192,0.4)',
-          borderColor: 'rgba(75,192,192,1)',
+          backgroundColor: 'rgba(255,99,132,0.4)',
+          borderColor: 'rgba(255,99,132,1)',
           borderCapStyle: 'butt',
           borderDash: [],
           borderDashOffset: 0.0,
           borderJoinStyle: 'miter',
-          pointBorderColor: 'rgba(75,192,192,1)',
+          pointBorderColor: 'rgba(255,99,132,1)',
           pointBackgroundColor: '#fff',
           pointBorderWidth: 1,
           pointHoverRadius: 5,
@@ -323,26 +328,7 @@ class Map extends Component {
         }
       ]
     };
-    this.setState({
-      lineData: data
-    })
-  }
-
-  setYearsFromRawLineData() {
-    if (this.state.rawLineData === null) {
-      return []
-    } else {
-      let rows = this.state.rawLineData.rows
-      let years = []
-      for (let i = 0; i < rows.length; i++) {
-        if (!years.includes(rows[i]['key'][1])) {
-          years.push(rows[i]['key'][1])
-        }
-      }
-      this.setState({
-        lineDataYears: years
-      })
-    }
+    return data
   }
 
   componentDidMount() {
@@ -614,16 +600,25 @@ class Map extends Component {
                 options={bar_option} />
             </Panel>
             <Panel header="Tweet Traffic Diagram" key="3">
-              <Select
-                labelInValue
-                defaultValue={{ key: 'Select Year' }}
-                style={{ width: 150 }}
-                onChange={this.handleChange}
-              >
-                {this.state.lineDataYears.map((year) => { const optElem = (<Option value={year} key={year}> {year} </Option>); return optElem; })}
-              </Select>
-              <Line data={this.state.lineData} />
-
+              <Carousel
+                autoplay>
+                <div>
+                  <h>2016 Traffic Diagram</h>
+                  <LineDiagram data={this.state.lineData2016} />
+                </div>
+                <div>
+                  <h>2017 Traffic Diagram</h>
+                  <LineDiagram data={this.state.lineData2017} />
+                </div>
+                <div>
+                  <h>2018 Traffic Diagram</h>
+                  <LineDiagram data={this.state.lineData2018} />
+                </div>
+                <div>
+                  <h>2019 Traffic Diagram</h>
+                  <LineDiagram data={this.state.lineData2019} />
+                </div>
+              </Carousel>
             </Panel>
           </Collapse>
         </Drawer>
@@ -643,7 +638,6 @@ class Map extends Component {
     );
   }
 }
-
 
 function PDDrawCard(props) {
   const data = props.data;
@@ -678,6 +672,24 @@ function PDDrawCard(props) {
         src={GOBACKEND_URL + "helper/get_annotated_image?image_url=" + encodeURIComponent(data.images[0].url)}
         width='100%' />
     </Card>
+  );
+}
+
+function LineDiagram(props) {
+  const data = props.data;
+  if (data == null) {
+    return (
+      <Card
+        title={'loading'}
+        style={{ width: '100%' }}
+      >
+        <p>{'loading'}</p>
+      </Card>);
+  }
+  return (
+    <div>
+      <Line data={data} />
+    </div>
   );
 }
 
