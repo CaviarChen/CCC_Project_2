@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Row, Col, Card, Icon, Collapse, Typography, Divider } from 'antd';
+import { Button, Card, Col, Collapse, Icon, Row, Typography } from 'antd';
 
 import AppLayout from './layouts/AppLayout';
 
@@ -10,13 +10,9 @@ class Project extends Component {
     const { Title, Paragraph, Text } = Typography;
     const Panel = Collapse.Panel;
 
-    function callback(key) {
-      console.log(key);
-    }
-
     return (
       <AppLayout>
-        <Collapse defaultActiveKey={['1']} onChange={callback}>
+        <Collapse defaultActiveKey={['1']}>
           <Panel header="Project Description" key="1">
             <Typography>
               <Title level={2}>Introduction</Title>
@@ -36,28 +32,9 @@ class Project extends Component {
                   <li><Text strong>Wrath:</Text> tweets that include the likes of “I hate...”, “I’m angry...” or about crime or areas with high levels of negative emotion (sentiment) on particular topics etc</li>
                   <li><Text strong>Sloth:</Text> tweets that mention sleep, laziness, or areas where there are more/less tweets at night/early morning.</li>
                 </ul>
-              </Paragraph>
-
-              <Divider />
-
-              <Title level={2}>About Our Project</Title>
-              <Paragraph>
-                balabalabalabala
-              </Paragraph>
-              <Paragraph>
-                balabalabalabala<Text strong>balabalabalabala</Text>。
-              </Paragraph>
-              <Title level={3}>balabalabalabala</Title>
-              <Paragraph>
-                balabalabalabala<Text code>balabalabalabala</Text><Text code>balabalabalabala</Text>
-              </Paragraph>
-
-              <Paragraph>
-                <ul>
-                  <li><a href="/docs/spec/proximity">balabalabalabala</a></li>
-                  <li><a href="/docs/pattern/navigation">balabalabalabala</a></li>
-                  <li><a href="/docs/resource/download">balabalabalabala</a></li>
-                </ul>
+                <Button type="link" size={'large'} href="https://github.com/CaviarChen/CCC_Project_2">
+                  GitHub Repo
+                </Button>
               </Paragraph>
             </Typography>
           </Panel>

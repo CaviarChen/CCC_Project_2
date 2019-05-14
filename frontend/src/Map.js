@@ -590,13 +590,13 @@ class Map extends Component {
               <Doughnut
                 data={this.state.doughnutData}
                 width={100}
-                height={120} />
+                height={85} />
             </Panel>
             <Panel header="Relationship Bar Chart" key="2">
               <Bar
                 data={this.state.barData}
                 width={100}
-                height={120}
+                height={85}
                 options={bar_option} />
             </Panel>
             <Panel header="Tweet Traffic Diagram" key="3">
@@ -622,8 +622,6 @@ class Map extends Component {
             </Panel>
           </Collapse>
         </Drawer>
-
-
         <Drawer
           title="Tweet Content"
           width="35%"
