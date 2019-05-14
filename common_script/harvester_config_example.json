@@ -1,0 +1,22 @@
+{
+    "_id": "harvester:alfa",
+    "last_active": 1557848114,
+    "twitter": {
+      "info": "Twitter developer account",
+      "consumer_key": "",
+      "consumer_secret": "",
+      "access_token": "1125022748084883456-",
+      "access_token_secret": ""
+    },
+    "twitter_stream_locations": [
+      144.6563,
+      -38.503,
+      144.916,
+      -38.2527,
+      144.916,
+      -38.503,
+      145.1841,
+      -38.004
+    ],
+    "last_exec_id": "c1cf8348-760a-11e9-8c1d-0242ac110002"
+  }
