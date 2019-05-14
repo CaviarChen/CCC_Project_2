@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import mapboxgl from 'mapbox-gl'
-import { Drawer, Collapse, Spin, Card, Tag, Divider, Statistic, Row, Col, Icon } from 'antd'
-import { Bar, Doughnut } from 'react-chartjs-2'
+import { Drawer, Collapse, Spin, Card, Tag, Divider, Statistic, Row, Col, Icon, Select } from 'antd'
+import { Bar, Doughnut, Line } from 'react-chartjs-2'
 import Axios from 'axios';
 import 'mapbox-gl/dist/mapbox-gl.css'
 import './Map.css'
@@ -14,6 +14,7 @@ import * as mel_geo_basic_url from './melbourne_avgpoints.geojson'
 import * as mel_census_data from './melb_census.geojson'
 
 const Panel = Collapse.Panel;
+const Option = Select.Option;
 const bar_option = {
   scales: {
     yAxes: [{
@@ -40,7 +41,7 @@ class Map extends Component {
       map: null,
       is_loading: true,
       current_pd_docid: null,
-      pieData: null,
+      current_area_code: null,
       barData: null,
       doughnutData: null,
       sa2name: null,
@@ -49,7 +50,12 @@ class Map extends Component {
       related_tweet: null,
       image_tweet: null,
       legend_display: 'block',
-      guide_display: 'block'
+      guide_display: 'block',
+
+      lineDataYear: null,
+      rawLineData: null,
+      lineData: null,
+      lineDataYears: null,
     };
   }
 
@@ -117,6 +123,14 @@ class Map extends Component {
     return geo
   }
 
+  handleChange(value) {
+    this.setState({
+      lineDataYear: parseInt(value, 10)
+    })
+  }
+
+  handleChange = this.handleChange.bind(this)
+
   onAreaClick = (e) => {
     this.showDrawer(e)
     this.state.map.flyTo({
@@ -146,6 +160,7 @@ class Map extends Component {
       image_tweet: e.properties.IMAGE_TWEET,
       advisible: true,
       sa2name: e.properties.SA2_NAME16,
+      current_area_code: e.id,
 
       doughnutData: {
         labels: [
@@ -195,6 +210,7 @@ class Map extends Component {
         }]
       }
     })
+    this.loadAreaData(e)
   };
 
   onClose = () => {
@@ -212,11 +228,22 @@ class Map extends Component {
   };
 
   loadPdData = async (docid) => {
-    const res = await Axios.get(DATABASE_URL + '/tweet_data/' + docid)
+    const res = await Axios.get(DATABASE_URL + 'tweet_data/' + docid)
     if (docid === this.state.current_pd_docid) {
       this.setState({
         current_pd_data: res.data.data,
       })
+    }
+  }
+
+  loadAreaData = async (e) => {
+    const res = await Axios.get(DATABASE_URL + 'tweet_data/_design/designDoc/_view/melbourne_surburb_time_interval?group_level=3&startkey=[' + e.id + ']&endkey=[' + e.id + ', {}, {}]')
+    if (e.id === this.state.current_area_code) {
+      this.setState({
+        rawLineData: res.data
+      })
+      this.setYearsFromRawLineData()
+      this.setYearData()
     }
   }
 
@@ -226,6 +253,97 @@ class Map extends Component {
       current_pd_data: null
     });
   };
+
+  setYearData() {
+    if (this.state.rawLineData === null || this.state.lineDataYear === null){
+      return 
+    }
+    let timeMap = {}
+    let timeLable = []
+    let totalValue = []
+    let relatedValue = []
+    let rows = this.state.rawLineData.rows
+    for(let y=0;y<25;y++){
+      timeMap[y] = [0, 0]
+    }
+    for(let i=0;i<rows.length;i++){
+      if(rows[i].key[1] === this.state.lineDataYear){
+        timeMap[rows[i].key[2]] = rows[i].value
+      }
+    }
+    for(let n=0;n<25;n++){
+      relatedValue.push(timeMap[n][0])
+      totalValue.push(timeMap[n][1])
+      timeLable.push(n.toString() + ':00')
+    }
+    let data = {
+      labels: timeLable,
+      datasets: [
+        {
+          label: 'Total Tweet',
+          fill: false,
+          lineTension: 0.1,
+          backgroundColor: 'rgba(75,192,192,0.4)',
+          borderColor: 'rgba(75,192,192,1)',
+          borderCapStyle: 'butt',
+          borderDash: [],
+          borderDashOffset: 0.0,
+          borderJoinStyle: 'miter',
+          pointBorderColor: 'rgba(75,192,192,1)',
+          pointBackgroundColor: '#fff',
+          pointBorderWidth: 1,
+          pointHoverRadius: 5,
+          pointHoverBackgroundColor: 'rgba(75,192,192,1)',
+          pointHoverBorderColor: 'rgba(220,220,220,1)',
+          pointHoverBorderWidth: 2,
+          pointRadius: 1,
+          pointHitRadius: 10,
+          data: totalValue
+        },
+        {
+          label: 'Related Tweet',
+          fill: false,
+          lineTension: 0.1,
+          backgroundColor: 'rgba(75,192,192,0.4)',
+          borderColor: 'rgba(75,192,192,1)',
+          borderCapStyle: 'butt',
+          borderDash: [],
+          borderDashOffset: 0.0,
+          borderJoinStyle: 'miter',
+          pointBorderColor: 'rgba(75,192,192,1)',
+          pointBackgroundColor: '#fff',
+          pointBorderWidth: 1,
+          pointHoverRadius: 5,
+          pointHoverBackgroundColor: 'rgba(75,192,192,1)',
+          pointHoverBorderColor: 'rgba(220,220,220,1)',
+          pointHoverBorderWidth: 2,
+          pointRadius: 1,
+          pointHitRadius: 10,
+          data: relatedValue
+        }
+      ]
+    };
+    this.setState({
+      lineData: data
+    })
+  }
+
+  setYearsFromRawLineData() {
+    if (this.state.rawLineData === null) {
+      return []
+    } else {
+      let rows = this.state.rawLineData.rows
+      let years = []
+      for (let i = 0; i < rows.length; i++) {
+        if (!years.includes(rows[i]['key'][1])) {
+          years.push(rows[i]['key'][1])
+        }
+      }
+      this.setState({
+        lineDataYears: years
+      })
+    }
+  }
 
   componentDidMount() {
     const { lng, lat, zoom } = this.state;
@@ -414,19 +532,19 @@ class Map extends Component {
       }
     });
 
-    map.on('zoom', function() {
+    map.on('zoom', function () {
       if (map.getZoom() >= 10) {
-      this.setState({
-        legend_display: 'none',
-        guide_display: 'none'
-      })
+        this.setState({
+          legend_display: 'none',
+          guide_display: 'none'
+        })
       } else {
         this.setState({
           legend_display: 'block',
           guide_display: 'block'
         })
       }
-      }.bind(this));
+    }.bind(this));
   }
 
   render() {
@@ -438,21 +556,21 @@ class Map extends Component {
           size="large"
           tip="Loading..."
           style={{ position: "absolute", margin: "auto", top: "50%", left: "50%", zIndex: "1000" }} />
-        <div class='legend' style={{display: this.state.legend_display}}>
+        <div className='legend' style={{ display: this.state.legend_display }}>
           <h4>Related Tweets Percentage</h4>
-          <div><span style={{backgroundColor: '#F2F12D'}}></span>0%</div>
-          <div><span style={{backgroundColor: '#EED322'}}></span>10%</div>
-          <div><span style={{backgroundColor: '#E6B71E'}}></span>20%</div>
-          <div><span style={{backgroundColor: '#DA9C20'}}></span>30%</div>
-          <div><span style={{backgroundColor: '#CA8323'}}></span>40%</div>
-          <div><span style={{backgroundColor: '#B86B25'}}></span>50%</div>
-          <div><span style={{backgroundColor: '#A25626'}}></span>60%</div>
-          <div><span style={{backgroundColor: '#8B4225'}}></span>70%</div>
-          <div><span style={{backgroundColor: '#723122'}}></span>80%</div>
-          <div><span style={{backgroundColor: '#512015'}}></span>90%</div>
-          <div><span style={{backgroundColor: '#000000'}}></span>100%</div>
+          <div><span style={{ backgroundColor: '#F2F12D' }}></span>0%</div>
+          <div><span style={{ backgroundColor: '#EED322' }}></span>10%</div>
+          <div><span style={{ backgroundColor: '#E6B71E' }}></span>20%</div>
+          <div><span style={{ backgroundColor: '#DA9C20' }}></span>30%</div>
+          <div><span style={{ backgroundColor: '#CA8323' }}></span>40%</div>
+          <div><span style={{ backgroundColor: '#B86B25' }}></span>50%</div>
+          <div><span style={{ backgroundColor: '#A25626' }}></span>60%</div>
+          <div><span style={{ backgroundColor: '#8B4225' }}></span>70%</div>
+          <div><span style={{ backgroundColor: '#723122' }}></span>80%</div>
+          <div><span style={{ backgroundColor: '#512015' }}></span>90%</div>
+          <div><span style={{ backgroundColor: '#000000' }}></span>100%</div>
         </div>
-        <div class='toplegend' style={{display: this.state.guide_display}}>
+        <div className='toplegend' style={{ display: this.state.guide_display }}>
           <h4>Quick Guide</h4>
           <div>1. Click area for Statistic Results.</div>
           <div>2. Zoom in for detailed inspection.</div>
@@ -470,7 +588,7 @@ class Map extends Component {
           onClose={this.onClose}
           visible={this.state.advisible}
         >
-          <Collapse defaultActiveKey={['1', '2']}>
+          <Collapse defaultActiveKey={['1', '2', '3']}>
             <Panel header="Related Tweet Pie Chart" key="1">
               <Row gutter={16}>
                 <Col span={8}>
@@ -495,8 +613,22 @@ class Map extends Component {
                 height={120}
                 options={bar_option} />
             </Panel>
+            <Panel header="Tweet Traffic Diagram" key="3">
+              <Select
+                labelInValue
+                defaultValue={{ key: 'Select Year' }}
+                style={{ width: 150 }}
+                onChange={this.handleChange}
+              >
+                {this.state.lineDataYears.map((year) => { const optElem = (<Option value={year} key={year}> {year} </Option>); return optElem; })}
+              </Select>
+              <Line data={this.state.lineData} />
+
+            </Panel>
           </Collapse>
         </Drawer>
+
+
         <Drawer
           title="Tweet Content"
           width="35%"
@@ -511,6 +643,7 @@ class Map extends Component {
     );
   }
 }
+
 
 function PDDrawCard(props) {
   const data = props.data;
