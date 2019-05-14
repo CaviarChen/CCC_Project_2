@@ -10,7 +10,7 @@ import config
 class DBHelper:
     def __init__(self) -> None:
         self.client = CouchDB(config.couchdb_user, config.couchdb_auth_token, \
-            url=config.couchdb_host, admin_party=config.couchdb_admin_party, connect=True, auto_renew=True)
+            url=config.couchdb_host, admin_party=config.couchdb_admin_party, connect=True, use_basic_auth=True)
         self.node_id = config.node_id
     
     # add if not exists
