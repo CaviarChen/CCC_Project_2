@@ -34,8 +34,9 @@ Zijun Chen 813190
 ![](.github/diagram1.png)
 
 ### Data Flow
-![](.github/diagram2.png)
-![](.github/diagram3.png)
+| <!-- -->    | <!-- -->    |
+|-------------|-------------|
+| ![](.github/diagram2.png)         | ![](.github/diagram3.png)         |
 
 
 ## Full Report
