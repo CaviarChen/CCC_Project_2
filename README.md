@@ -4,7 +4,7 @@
 
 [![Demo Video](https://img.youtube.com/vi/HiE8ropg83Q/0.jpg)](https://www.youtube.com/watch?v=HiE8ropg83Q)
 
-**Frontend demo starts at 5:22**
+*Frontend demo starts at 5:22*
 
 
 ## Project Details
