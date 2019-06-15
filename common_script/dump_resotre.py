@@ -1,3 +1,4 @@
+# dump scheme only
 from db_helper import DBHelper
 import config
 import json
